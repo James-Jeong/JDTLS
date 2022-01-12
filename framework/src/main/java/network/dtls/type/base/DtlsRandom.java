@@ -22,7 +22,7 @@ public class DtlsRandom {
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+00"));
         Date date = calendar.getTime();
-        byte[] dateData = ByteUtil.longToBytes(date.getTime(), true);
+        byte[] dateData = ByteUtil.intToBytes((int) date.getTime(), true);
         System.arraycopy(dateData, 0, totalData, 0, TIME_LENGTH);
 
         try {

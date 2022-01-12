@@ -74,7 +74,10 @@ public class DtlsPacket {
         if (dtlsRecordLayerList == null) { return null; }
 
         int index = 0;
-        byte[] data = new byte[getRecordLayerTotalSize()];
+        int totalDataLength = getRecordLayerTotalSize();
+        if (totalDataLength <= 0) { return null; }
+
+        byte[] data = new byte[totalDataLength];
 
         for (DtlsRecordLayer dtlsRecordLayer : dtlsRecordLayerList) {
             if (dtlsRecordLayer == null) { continue; }

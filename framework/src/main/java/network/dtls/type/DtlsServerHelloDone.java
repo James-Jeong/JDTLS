@@ -16,14 +16,23 @@ public class DtlsServerHelloDone extends DtlsFormat {
     public DtlsServerHelloDone() {}
 
     public DtlsServerHelloDone(byte[] data) {
-        // TODO
+        if (data.length == LENGTH) {
+            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
+            System.arraycopy(data, 0, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
+            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
+        }
     }
 
     @Override
     public byte[] getData() {
-        // TODO
-        int index = 0;
-        return null;
+        if (dtlsHandshakeCommonBody == null) { return null; }
+
+        byte[] data = new byte[LENGTH];
+
+        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
+        System.arraycopy(commonBodyData, 0, data, 0, DtlsHandshakeCommonBody.LENGTH);
+
+        return data;
     }
 
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {

@@ -15,19 +15,20 @@ import network.dtls.type.base.DtlsHandshakeCommonBody;
  */
 public class DtlsServerKeyExchange extends DtlsFormat {
 
-    public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + 128;
+    public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH;
 
     private DtlsHandshakeCommonBody dtlsHandshakeCommonBody;
     private byte[] encryptedPreMasterSecretData;
 
-    public DtlsServerKeyExchange(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
+    public DtlsServerKeyExchange(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, byte[] encryptedPreMasterSecretData) {
         this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
+        this.encryptedPreMasterSecretData = encryptedPreMasterSecretData;
     }
 
     public DtlsServerKeyExchange() {}
 
     public DtlsServerKeyExchange(byte[] data) {
-        if (data.length >= LENGTH) {
+        if (data.length >= MIN_LENGTH) {
             int index = 0;
 
             byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
@@ -35,8 +36,11 @@ public class DtlsServerKeyExchange extends DtlsFormat {
             dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
             index += commonBodyData.length;
 
-            encryptedPreMasterSecretData = new byte[128];
-            System.arraycopy(data, index, encryptedPreMasterSecretData, 0, 128);
+            int remainLength = (int) dtlsHandshakeCommonBody.getFragmentLength();
+            if (remainLength > 0) {
+                encryptedPreMasterSecretData = new byte[remainLength];
+                System.arraycopy(data, index, encryptedPreMasterSecretData, 0, remainLength);
+            }
         }
     }
 
@@ -45,13 +49,19 @@ public class DtlsServerKeyExchange extends DtlsFormat {
         if (dtlsHandshakeCommonBody == null || encryptedPreMasterSecretData == null) { return null; }
 
         int index = 0;
-        byte[] data = new byte[LENGTH];
+        byte[] data;
 
-        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-        index += DtlsHandshakeCommonBody.LENGTH;
-
-        System.arraycopy(encryptedPreMasterSecretData, 0, data, index, encryptedPreMasterSecretData.length);
+        if (encryptedPreMasterSecretData.length > 0) {
+            data = new byte[MIN_LENGTH + encryptedPreMasterSecretData.length];
+            byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
+            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
+            index += DtlsHandshakeCommonBody.LENGTH;
+            System.arraycopy(encryptedPreMasterSecretData, 0, data, index, encryptedPreMasterSecretData.length);
+        } else {
+            data = new byte[MIN_LENGTH];
+            byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
+            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
+        }
 
         return data;
     }
