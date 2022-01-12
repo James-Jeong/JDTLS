@@ -4,6 +4,7 @@ import network.dtls.cipher.DtlsCipherSuite;
 import network.dtls.cipher.DtlsCipherSuiteList;
 import network.dtls.cipher.DtlsCipherSuiteType;
 import network.dtls.compression.DtlsCompressionMethod;
+import network.dtls.packet.DtlsPacket;
 import network.dtls.packet.base.DtlsProtocolVersion;
 import network.dtls.type.DtlsClientHello;
 import network.dtls.type.base.DtlsHandshakeCommonBody;
@@ -26,7 +27,12 @@ public class DtlsTest {
     public void test() {
         Assert.assertNotNull(createDtlsCipherSuiteListTest());
         Assert.assertNotNull(createDtlsClientHelloTest());
+        //createDtlsPacketTest();
     }
+
+    /*public static DtlsPacket createDtlsPacketTest() {
+        return null;
+    }*/
 
     public static DtlsCipherSuiteList createDtlsCipherSuiteListTest() {
         List<DtlsCipherSuite> dtlsCipherSuiteLists = new ArrayList<>();

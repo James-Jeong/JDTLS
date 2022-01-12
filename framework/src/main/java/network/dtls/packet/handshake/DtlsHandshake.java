@@ -8,19 +8,19 @@ import network.dtls.type.base.DtlsHandshakeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DtlsHandshakeBody {
+public class DtlsHandshake implements DtlsHandshakeFactory {
 
-    private static final Logger logger = LoggerFactory.getLogger(DtlsHandshakeBody.class);
+    private static final Logger logger = LoggerFactory.getLogger(DtlsHandshake.class);
 
     private DtlsFormat dtlsFormat;
 
-    public DtlsHandshakeBody(DtlsFormat dtlsFormat) {
+    public DtlsHandshake(DtlsFormat dtlsFormat) {
         this.dtlsFormat = dtlsFormat;
     }
 
-    public DtlsHandshakeBody() {}
+    public DtlsHandshake() {}
 
-    public DtlsHandshakeBody(DtlsHandshakeType dtlsHandshakeType, byte[] data) {
+    public DtlsHandshake(DtlsHandshakeType dtlsHandshakeType, byte[] data) {
         if (data.length > 0) {
             switch (dtlsHandshakeType.getType()) {
                 case DtlsHandshakeType.TLS_TYPE_HELLO_REQUEST:
