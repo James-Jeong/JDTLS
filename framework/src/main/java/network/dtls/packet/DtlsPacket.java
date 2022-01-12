@@ -2,23 +2,20 @@ package network.dtls.packet;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.dtls.packet.handshake.DtlsHandShake;
+import network.dtls.packet.recordlayer.DtlsRecordLayer;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Single or Compound 가능
+ */
 public class DtlsPacket {
 
-    private List<DtlsHandShake> dtlsHandShakeList = new ArrayList<>();
-    private DtlsChangeCipherSpecMessage dtlsChangeCipherSpecMessage;
+    private List<DtlsRecordLayer> dtlsRecordLayerList = new ArrayList<>();
 
-    public DtlsPacket(List<DtlsHandShake> dtlsHandShakeList, DtlsChangeCipherSpecMessage dtlsChangeCipherSpecMessage) {
-        this.dtlsHandShakeList = dtlsHandShakeList;
-        this.dtlsChangeCipherSpecMessage = dtlsChangeCipherSpecMessage;
-    }
-
-    public DtlsPacket(List<DtlsHandShake> dtlsHandShakeList) {
-        this.dtlsHandShakeList = dtlsHandShakeList;
+    public DtlsPacket(List<DtlsRecordLayer> dtlsHandShakeList) {
+        this.dtlsRecordLayerList = dtlsHandShakeList;
     }
 
     public DtlsPacket() {}
@@ -33,20 +30,12 @@ public class DtlsPacket {
         return null;
     }
 
-    public List<DtlsHandShake> getDtlsHandShakeList() {
-        return dtlsHandShakeList;
+    public List<DtlsRecordLayer> getDtlsRecordLayerList() {
+        return dtlsRecordLayerList;
     }
 
-    public void setDtlsHandShakeList(List<DtlsHandShake> dtlsHandShakeList) {
-        this.dtlsHandShakeList = dtlsHandShakeList;
-    }
-
-    public DtlsChangeCipherSpecMessage getDtlsChangeCipherSpecMessage() {
-        return dtlsChangeCipherSpecMessage;
-    }
-
-    public void setDtlsChangeCipherSpecMessage(DtlsChangeCipherSpecMessage dtlsChangeCipherSpecMessage) {
-        this.dtlsChangeCipherSpecMessage = dtlsChangeCipherSpecMessage;
+    public void setDtlsRecordLayerList(List<DtlsRecordLayer> dtlsRecordLayerList) {
+        this.dtlsRecordLayerList = dtlsRecordLayerList;
     }
 
     @Override

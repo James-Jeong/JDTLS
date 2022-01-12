@@ -2,15 +2,16 @@ package network.dtls.packet.recordlayer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import network.dtls.packet.handshake.DtlsHandShake;
 
 public class DtlsRecordLayer {
 
     private DtlsRecordHeader recordHeader;
-    private byte[] handshakeProtocol;
+    private DtlsHandShake dtlsHandShake;
 
-    public DtlsRecordLayer(DtlsRecordHeader recordHeader, byte[] handshakeProtocol) {
+    public DtlsRecordLayer(DtlsRecordHeader recordHeader, DtlsHandShake dtlsHandShake) {
         this.recordHeader = recordHeader;
-        this.handshakeProtocol = handshakeProtocol;
+        this.dtlsHandShake = dtlsHandShake;
     }
 
     public DtlsRecordLayer() {}
@@ -33,12 +34,12 @@ public class DtlsRecordLayer {
         this.recordHeader = recordHeader;
     }
 
-    public byte[] getHandshakeProtocol() {
-        return handshakeProtocol;
+    public DtlsHandShake getDtlsHandShake() {
+        return dtlsHandShake;
     }
 
-    public void setHandshakeProtocol(byte[] handshakeProtocol) {
-        this.handshakeProtocol = handshakeProtocol;
+    public void setDtlsHandShake(DtlsHandShake dtlsHandShake) {
+        this.dtlsHandShake = dtlsHandShake;
     }
 
     @Override

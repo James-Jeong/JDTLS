@@ -101,6 +101,8 @@ public class DtlsClientHello extends DtlsFormat {
 
     @Override
     public byte[] getData() {
+        if (dtlsHandshakeCommonBody == null || protocolVersion == null || randomBytes == null || dtlsCompressionMethod == null) { return null; }
+
         int index = 0;
         byte[] data = new byte[MIN_LENGTH + cipherSuitesLength];
 

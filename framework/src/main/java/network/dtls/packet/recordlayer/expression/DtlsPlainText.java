@@ -1,7 +1,8 @@
-package network.dtls.packet.recordlayer;
+package network.dtls.packet.recordlayer.expression;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import network.dtls.packet.recordlayer.DtlsRecordHeader;
 
 public class DtlsPlainText {
 

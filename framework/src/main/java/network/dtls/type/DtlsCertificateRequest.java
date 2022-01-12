@@ -19,17 +19,17 @@ public class DtlsCertificateRequest extends DtlsFormat {
         // TODO
     }
 
+    @Override
+    public byte[] getData() {
+        return new byte[0];
+    }
+
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
         return dtlsHandshakeCommonBody;
     }
 
     public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
         this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
-
-    @Override
-    public byte[] getData() {
-        return new byte[0];
     }
 
 }

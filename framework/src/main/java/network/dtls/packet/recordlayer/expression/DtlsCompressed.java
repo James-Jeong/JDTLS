@@ -1,21 +1,26 @@
-package network.dtls.packet.recordlayer;
+package network.dtls.packet.recordlayer.expression;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import network.dtls.packet.base.DtlsCipherType;
+import network.dtls.packet.recordlayer.DtlsRecordHeader;
 
-public class DtlsCipherText {
+public class DtlsCompressed {
 
     private DtlsRecordHeader recordHeader;
-    private final DtlsCipherType cipherType = DtlsCipherType.GENERIC_BLOCK_CIPHER;
+    private byte[] fragment = null;
 
-    public DtlsCipherText(DtlsRecordHeader recordHeader) {
+    public DtlsCompressed(DtlsRecordHeader recordHeader, byte[] fragment) {
+        this.recordHeader = recordHeader;
+        this.fragment = fragment;
+    }
+
+    public DtlsCompressed(DtlsRecordHeader recordHeader) {
         this.recordHeader = recordHeader;
     }
 
-    public DtlsCipherText() {}
+    public DtlsCompressed() {}
 
-    public DtlsCipherText(byte[] data) {
+    public DtlsCompressed(byte[] data) {
         // TODO
     }
 
@@ -31,6 +36,14 @@ public class DtlsCipherText {
 
     public void setRecordHeader(DtlsRecordHeader recordHeader) {
         this.recordHeader = recordHeader;
+    }
+
+    public byte[] getFragment() {
+        return fragment;
+    }
+
+    public void setFragment(byte[] fragment) {
+        this.fragment = fragment;
     }
 
     @Override

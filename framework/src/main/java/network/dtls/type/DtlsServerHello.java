@@ -66,6 +66,9 @@ public class DtlsServerHello extends DtlsFormat {
 
     @Override
     public byte[] getData() {
+        if (dtlsHandshakeCommonBody == null || randomBytes == null || sessionIdBytes == null
+                || cipherSuite == null || dtlsCompressionMethod == null) { return null; }
+
         int index = 0;
         byte[] data = new byte[LENGTH];
 

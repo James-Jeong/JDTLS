@@ -1,5 +1,15 @@
 package network.dtls;
 
+import network.dtls.unit.DtlsUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Made by a singleton pattern
+ */
 public class DtlsHandshakeManager {
 
     /**
@@ -53,8 +63,72 @@ public class DtlsHandshakeManager {
      *      The replay detection feature is optional, since packet duplication is not always malicious, but can also occur due to routing errors.
      *      Applications may conceivably detect duplicate packets and accordingly modify their data transmission strategy.
      *
-     *
-     *
      */
+
+    private static final Logger logger = LoggerFactory.getLogger(DtlsHandshakeManager.class);
+    
+    ////////////////////////////////////////////////////////////
+    // VARIABLES
+    public static DtlsHandshakeManager dtlsHandshakeManager = null;
+
+    private final HashMap<String, DtlsUnit> dtlsUnitHashMap = new HashMap<>();
+    private final ReentrantLock dtlsUnitHashMapLock = new ReentrantLock();
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // CONSTRUCTORs
+    public DtlsHandshakeManager() {}
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
+    // FUNCTIONS
+    public static DtlsHandshakeManager getInstance() {
+        if (dtlsHandshakeManager == null) {
+            dtlsHandshakeManager = new DtlsHandshakeManager();
+        }
+
+        return dtlsHandshakeManager;
+    }
+    ////////////////////////////////////////////////////////////
+
+    public void addDtlsUnit(String key) {
+        if (key == null) {
+            logger.warn("Fail to add a new dtls unit. Argument error is occurred. (key={})", key);
+            return;
+        }
+
+        dtlsUnitHashMapLock.lock();
+        try {
+            dtlsUnitHashMap.putIfAbsent(
+                    key,
+                    new DtlsUnit()
+            );
+        } catch (Exception e) {
+            logger.warn("DtlsHandshakeManager.addDtlsUnit.Exception", e);
+        } finally {
+            dtlsUnitHashMapLock.unlock();
+        }
+    }
+
+    public void deleteDtlsUnit(String key) {
+        if (key == null) { return; }
+
+        dtlsUnitHashMapLock.lock();
+        try {
+            dtlsUnitHashMap.remove(key);
+        } catch (Exception e) {
+            logger.warn("DtlsHandshakeManager.deleteDtlsUnit.Exception", e);
+        } finally {
+            dtlsUnitHashMapLock.unlock();
+        }
+    }
+
+    public DtlsUnit getDtlsUnit(String key) {
+        return dtlsUnitHashMap.get(key);
+    }
+
+    public int getDtlsUnitMapSize() {
+        return dtlsUnitHashMap.size();
+    }
 
 }

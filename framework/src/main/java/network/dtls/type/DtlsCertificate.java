@@ -47,6 +47,8 @@ public class DtlsCertificate extends DtlsFormat {
 
     @Override
     public byte[] getData() {
+        if (dtlsHandshakeCommonBody == null || certificates == null) { return null; }
+
         int index = 0;
 
         byte[] data;

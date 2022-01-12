@@ -12,7 +12,9 @@ public class DtlsFinished extends DtlsFormat {
     public DtlsFinished() {}
 
     public DtlsFinished(byte[] data) {
-        // TODO
+        if (data.length >= LENGTH) {
+
+        }
     }
 
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {

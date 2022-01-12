@@ -1,16 +1,17 @@
-package network.dtls.packet;
+package network.dtls.packet.recordlayer.message;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import network.dtls.packet.handshake.DtlsHandshakeHeader;
+import network.dtls.packet.recordlayer.DtlsRecordHeader;
 
 public class DtlsApplicationData {
 
-    private DtlsHandshakeHeader dtlsHandshakeHeader;
+    private DtlsRecordHeader dtlsRecordHeader;
     private byte[] encryptedApplicationData;
 
-    public DtlsApplicationData(DtlsHandshakeHeader dtlsHandshakeHeader, byte[] encryptedAppliationData) {
-        this.dtlsHandshakeHeader = dtlsHandshakeHeader;
+    public DtlsApplicationData(DtlsRecordHeader dtlsRecordHeader, byte[] encryptedAppliationData) {
+        this.dtlsRecordHeader = dtlsRecordHeader;
         this.encryptedApplicationData = encryptedAppliationData;
     }
 
@@ -22,7 +23,7 @@ public class DtlsApplicationData {
 
             byte[] dtlsHandshakeHeaderData = new byte[DtlsHandshakeHeader.LENGTH];
             System.arraycopy(data, index, dtlsHandshakeHeaderData, 0, DtlsHandshakeHeader.LENGTH);
-            dtlsHandshakeHeader = new DtlsHandshakeHeader(dtlsHandshakeHeaderData);
+            dtlsRecordHeader = new DtlsRecordHeader(dtlsHandshakeHeaderData);
             index += DtlsHandshakeHeader.LENGTH;
 
             int remainLength = data.length - DtlsHandshakeHeader.LENGTH;
@@ -33,7 +34,7 @@ public class DtlsApplicationData {
 
     public byte[] getData() {
         byte[] data;
-        byte[] dtlsHandshakeHeaderData = dtlsHandshakeHeader.getData();
+        byte[] dtlsHandshakeHeaderData = dtlsRecordHeader.getData();
 
         if (encryptedApplicationData != null && encryptedApplicationData.length > 0) {
             int index = 0;
@@ -49,12 +50,12 @@ public class DtlsApplicationData {
         return data;
     }
 
-    public DtlsHandshakeHeader getDtlsHandshakeHeader() {
-        return dtlsHandshakeHeader;
+    public DtlsRecordHeader getDtlsHandshakeHeader() {
+        return dtlsRecordHeader;
     }
 
-    public void setDtlsHandshakeHeader(DtlsHandshakeHeader dtlsHandshakeHeader) {
-        this.dtlsHandshakeHeader = dtlsHandshakeHeader;
+    public void setDtlsHandshakeHeader(DtlsRecordHeader dtlsRecordHeader) {
+        this.dtlsRecordHeader = dtlsRecordHeader;
     }
 
     public byte[] getEncryptedApplicationData() {

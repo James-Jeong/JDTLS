@@ -3,6 +3,11 @@ package network.dtls.type;
 import network.dtls.type.base.DtlsFormat;
 import network.dtls.type.base.DtlsHandshakeCommonBody;
 
+/**
+ * - It provides the server with the necessary data
+ *      to generate the keys for the symmetric encryption.
+ * - Same with DtlsServerKeyExchange
+ */
 public class DtlsClientKeyExchange extends DtlsFormat {
 
     public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + 128;
@@ -18,14 +23,33 @@ public class DtlsClientKeyExchange extends DtlsFormat {
     public DtlsClientKeyExchange() {}
 
     public DtlsClientKeyExchange(byte[] data) {
-        // TODO
+        if (data.length == LENGTH) {
+            int index = 0;
+
+            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
+            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
+            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
+            index += commonBodyData.length;
+
+            encryptedPreMasterSecretData = new byte[128];
+            System.arraycopy(data, index, encryptedPreMasterSecretData, 0, 128);
+        }
     }
 
     @Override
     public byte[] getData() {
-        // TODO
+        if (dtlsHandshakeCommonBody == null || encryptedPreMasterSecretData == null) { return null; }
+
         int index = 0;
-        return null;
+        byte[] data = new byte[LENGTH];
+
+        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
+        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
+        index += DtlsHandshakeCommonBody.LENGTH;
+
+        System.arraycopy(encryptedPreMasterSecretData, 0, data, index, encryptedPreMasterSecretData.length);
+
+        return data;
     }
 
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
@@ -43,4 +67,5 @@ public class DtlsClientKeyExchange extends DtlsFormat {
     public void setEncryptedPreMasterSecretData(byte[] encryptedPreMasterSecretData) {
         this.encryptedPreMasterSecretData = encryptedPreMasterSecretData;
     }
+
 }
