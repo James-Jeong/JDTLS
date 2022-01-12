@@ -1,99 +1,165 @@
 package network.dtls.type;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import network.dtls.cipher.DtlsCipherSuiteList;
 import network.dtls.compression.DtlsCompressionMethod;
 import network.dtls.packet.base.DtlsProtocolVersion;
 import network.dtls.type.base.DtlsFormat;
-import network.dtls.type.base.DtlsHandshakeType;
+import network.dtls.type.base.DtlsHandshakeCommonBody;
 import network.dtls.type.base.DtlsRandom;
+import util.module.ByteUtil;
 
-public class DtlsClientHello implements DtlsFormat {
+public class DtlsClientHello extends DtlsFormat {
 
-    public static final int MIN_LENGTH = 52;
+    public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 40;
 
-    private DtlsHandshakeType handshakeType; // 1 byte
-    private long length; // 3 bytes
-    private int messageSequence; // 2 bytes
-    private long fragmentOffset; // 3 bytes
-    private long fragmentLength; // 3 bytes
+    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
     private DtlsProtocolVersion protocolVersion; // 2 bytes
-    private final byte[] randomBytes = DtlsRandom.getRandom(); // 32 bytes
+    transient private byte[] randomBytes; // 32 bytes > DtlsRandom.getRandom()
     private short sessionIdLength; // 1 byte
     private short cookieLength; // 1 byte
     private int cipherSuitesLength; // 2 bytes
     private DtlsCipherSuiteList dtlsCipherSuiteList; // cipherSuitesLength bytes
     private short compressionMethodsLength; // 1 byte
-    private DtlsCompressionMethod compressionMethod; // 1 byte
+    private DtlsCompressionMethod dtlsCompressionMethod; // 1 byte
 
-    public DtlsClientHello(DtlsHandshakeType handshakeType, long length, int messageSequence, long fragmentOffset, long fragmentLength, DtlsProtocolVersion protocolVersion, short sessionIdLength, short cookieLength, int cipherSuitesLength, DtlsCipherSuiteList dtlsCipherSuiteList, short compressionMethodsLength, DtlsCompressionMethod compressionMethod) {
-        this.handshakeType = handshakeType;
-        this.length = length;
-        this.messageSequence = messageSequence;
-        this.fragmentOffset = fragmentOffset;
-        this.fragmentLength = fragmentLength;
+    public DtlsClientHello(DtlsHandshakeCommonBody dtlsHandshakeCommonBody,
+                           DtlsProtocolVersion protocolVersion, byte[] randomBytes,
+                           short sessionIdLength, short cookieLength,
+                           int cipherSuitesLength, DtlsCipherSuiteList dtlsCipherSuiteList,
+                           short compressionMethodsLength, DtlsCompressionMethod compressionMethod) {
+        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
         this.protocolVersion = protocolVersion;
+        this.randomBytes = randomBytes;
         this.sessionIdLength = sessionIdLength;
         this.cookieLength = cookieLength;
         this.cipherSuitesLength = cipherSuitesLength;
         this.dtlsCipherSuiteList = dtlsCipherSuiteList;
         this.compressionMethodsLength = compressionMethodsLength;
-        this.compressionMethod = compressionMethod;
+        this.dtlsCompressionMethod = compressionMethod;
     }
 
     public DtlsClientHello() {}
 
     public DtlsClientHello(byte[] data) {
         if (data.length >= MIN_LENGTH) {
-            // TODO
+            int index = 0;
+
+            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
+            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
+            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
+            index += commonBodyData.length;
+
+            byte[] protocolVersionData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(data, index, protocolVersionData, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+            protocolVersion = new DtlsProtocolVersion(protocolVersionData);
+            index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+            randomBytes = new byte[DtlsRandom.LENGTH];
+            System.arraycopy(data, index, randomBytes, 0, DtlsRandom.LENGTH);
+            index += DtlsRandom.LENGTH;
+
+            byte[] sessionIdLengthData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, sessionIdLengthData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            byte[] sessionIdLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(sessionIdLengthData, 0, sessionIdLengthData2, ByteUtil.NUM_BYTES_IN_BYTE, ByteUtil.NUM_BYTES_IN_BYTE);
+            sessionIdLength = ByteUtil.bytesToShort(sessionIdLengthData2, true);
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+            byte[] cookieLengthData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, cookieLengthData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            byte[] cookieLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(cookieLengthData, 0, cookieLengthData2, ByteUtil.NUM_BYTES_IN_BYTE, ByteUtil.NUM_BYTES_IN_BYTE);
+            cookieLength = ByteUtil.bytesToShort(cookieLengthData2, true);
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+            byte[] cipherSuitesLengthData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(data, index, cipherSuitesLengthData, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+            byte[] cipherSuitesLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_INT];
+            System.arraycopy(cipherSuitesLengthData, 0, cipherSuitesLengthData2, ByteUtil.NUM_BYTES_IN_SHORT, ByteUtil.NUM_BYTES_IN_SHORT);
+            cipherSuitesLength = ByteUtil.bytesToInt(cipherSuitesLengthData2, true);
+            index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+            if (cipherSuitesLength > 0) {
+                byte[] cipherSuitesData = new byte[cipherSuitesLength];
+                System.arraycopy(data, index, cipherSuitesData, 0, cipherSuitesLength);
+                dtlsCipherSuiteList = new DtlsCipherSuiteList(cipherSuitesData);
+                index += cipherSuitesLength;
+            }
+
+            byte[] compressionMethodsLengthData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, compressionMethodsLengthData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            byte[] compressionMethodsLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(compressionMethodsLengthData, 0, compressionMethodsLengthData2, ByteUtil.NUM_BYTES_IN_BYTE, ByteUtil.NUM_BYTES_IN_BYTE);
+            compressionMethodsLength = ByteUtil.bytesToShort(compressionMethodsLengthData2, true);
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+            byte[] dtlsCompressionMethodData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, dtlsCompressionMethodData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            dtlsCompressionMethod = new DtlsCompressionMethod(dtlsCompressionMethodData[0]);
         }
     }
 
+    @Override
     public byte[] getData() {
-        // TODO
         int index = 0;
-        return null;
+        byte[] data = new byte[MIN_LENGTH + cipherSuitesLength];
+
+        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
+        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
+        index += DtlsHandshakeCommonBody.LENGTH;
+
+        System.arraycopy(protocolVersion.getVersion(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
+        index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+        System.arraycopy(randomBytes, 0, data, index, DtlsRandom.LENGTH);
+        index += DtlsRandom.LENGTH;
+
+        byte[] sessionIdLengthData = ByteUtil.shortToBytes(sessionIdLength, true);
+        byte[] sessionIdLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(sessionIdLengthData, ByteUtil.NUM_BYTES_IN_BYTE, sessionIdLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(sessionIdLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+        byte[] cookieLengthData = ByteUtil.shortToBytes(cookieLength, true);
+        byte[] cookieLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(cookieLengthData, ByteUtil.NUM_BYTES_IN_BYTE, cookieLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(cookieLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+        byte[] cipherSuitesLengthData = ByteUtil.intToBytes(cipherSuitesLength, true);
+        byte[] cipherSuitesLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+        System.arraycopy(cipherSuitesLengthData, ByteUtil.NUM_BYTES_IN_SHORT, cipherSuitesLengthData2, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+        System.arraycopy(cipherSuitesLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
+        index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+        if (dtlsCipherSuiteList != null) {
+            byte[] dtlsCipherSuiteListData = dtlsCipherSuiteList.getData();
+            if (dtlsCipherSuiteListData.length > 0) {
+                System.arraycopy(dtlsCipherSuiteListData, 0, data, index, dtlsCipherSuiteListData.length);
+                index += dtlsCipherSuiteListData.length;
+            }
+        }
+
+        byte[] compressionMethodsLengthData = ByteUtil.shortToBytes(compressionMethodsLength, true);
+        byte[] compressionMethodsLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(compressionMethodsLengthData, ByteUtil.NUM_BYTES_IN_BYTE, compressionMethodsLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(compressionMethodsLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+        byte[] dtlsCompressionMethodData = ByteUtil.intToBytes(dtlsCompressionMethod.getMethod(), true);
+        byte[] dtlsCompressionMethodData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(dtlsCompressionMethodData, ByteUtil.NUM_BYTES_IN_SHORT - ByteUtil.NUM_BYTES_IN_BYTE, dtlsCompressionMethodData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(dtlsCompressionMethodData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+
+        return data;
     }
 
-    public DtlsHandshakeType getHandshakeType() {
-        return handshakeType;
+    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
+        return dtlsHandshakeCommonBody;
     }
 
-    public void setHandshakeType(DtlsHandshakeType handshakeType) {
-        this.handshakeType = handshakeType;
-    }
-
-    public long getLength() {
-        return length;
-    }
-
-    public void setLength(long length) {
-        this.length = length;
-    }
-
-    public int getMessageSequence() {
-        return messageSequence;
-    }
-
-    public void setMessageSequence(int messageSequence) {
-        this.messageSequence = messageSequence;
-    }
-
-    public long getFragmentOffset() {
-        return fragmentOffset;
-    }
-
-    public void setFragmentOffset(long fragmentOffset) {
-        this.fragmentOffset = fragmentOffset;
-    }
-
-    public long getFragmentLength() {
-        return fragmentLength;
-    }
-
-    public void setFragmentLength(long fragmentLength) {
-        this.fragmentLength = fragmentLength;
+    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
+        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
     }
 
     public DtlsProtocolVersion getProtocolVersion() {
@@ -106,6 +172,10 @@ public class DtlsClientHello implements DtlsFormat {
 
     public byte[] getRandomBytes() {
         return randomBytes;
+    }
+
+    public void setRandomBytes(byte[] randomBytes) {
+        this.randomBytes = randomBytes;
     }
 
     public short getSessionIdLength() {
@@ -148,18 +218,11 @@ public class DtlsClientHello implements DtlsFormat {
         this.compressionMethodsLength = compressionMethodsLength;
     }
 
-    public DtlsCompressionMethod getCompressionMethod() {
-        return compressionMethod;
+    public DtlsCompressionMethod getDtlsCompressionMethod() {
+        return dtlsCompressionMethod;
     }
 
-    public void setCompressionMethod(DtlsCompressionMethod compressionMethod) {
-        this.compressionMethod = compressionMethod;
+    public void setDtlsCompressionMethod(DtlsCompressionMethod dtlsCompressionMethod) {
+        this.dtlsCompressionMethod = dtlsCompressionMethod;
     }
-
-    @Override
-    public String toString() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(this);
-    }
-
 }

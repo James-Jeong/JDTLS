@@ -52,7 +52,7 @@ public class DtlsHandshakeHeader {
             byte[] sequenceNumberData = new byte[6];
             System.arraycopy(data, index, sequenceNumberData, 0, 6);
             byte[] sequenceNumberData2 = new byte[ByteUtil.NUM_BYTES_IN_LONG];
-            System.arraycopy(sequenceNumberData, 0, sequenceNumberData2, ByteUtil.NUM_BYTES_IN_INT - 2, 6);
+            System.arraycopy(sequenceNumberData, 0, sequenceNumberData2, ByteUtil.NUM_BYTES_IN_LONG - 6, 6);
             sequenceNumber = ByteUtil.bytesToLong(sequenceNumberData2, true);
             index += 6;
 
@@ -65,9 +65,37 @@ public class DtlsHandshakeHeader {
     }
 
     public byte[] getData() {
-        // TODO
         int index = 0;
-        return null;
+        byte[] data = new byte[LENGTH];
+
+        byte[] contentTypeData = ByteUtil.intToBytes(contentType.getType(), true);
+        byte[] contentTypeData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(contentTypeData, ByteUtil.NUM_BYTES_IN_INT - ByteUtil.NUM_BYTES_IN_BYTE, contentTypeData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(contentTypeData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+        byte[] protocolVersionData = protocolVersion.getVersion();
+        System.arraycopy(protocolVersionData, ByteUtil.NUM_BYTES_IN_SHORT, data, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+        index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+        byte[] epochData = ByteUtil.intToBytes(epoch, true);
+        byte[] epochData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+        System.arraycopy(epochData, ByteUtil.NUM_BYTES_IN_SHORT, epochData2, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+        System.arraycopy(epochData2, 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
+        index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+        byte[] sequenceNumberData = ByteUtil.longToBytes(sequenceNumber, true);
+        byte[] sequenceNumberData2 = new byte[6];
+        System.arraycopy(sequenceNumberData, ByteUtil.NUM_BYTES_IN_LONG - 6, sequenceNumberData2, 0, 6);
+        System.arraycopy(sequenceNumberData2, 0, data, index, 6);
+        index += 6;
+
+        byte[] lengthData = ByteUtil.intToBytes(length, true);
+        byte[] lengthData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+        System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_SHORT, lengthData2, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+        System.arraycopy(lengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
+
+        return data;
     }
 
     public DtlsContentType getContentType() {

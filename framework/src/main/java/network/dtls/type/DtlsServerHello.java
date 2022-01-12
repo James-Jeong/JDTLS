@@ -1,38 +1,28 @@
 package network.dtls.type;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import network.dtls.cipher.DtlsCipherSuite;
 import network.dtls.compression.DtlsCompressionMethod;
-import network.dtls.packet.base.DtlsProtocolVersion;
 import network.dtls.type.base.DtlsFormat;
-import network.dtls.type.base.DtlsHandshakeType;
+import network.dtls.type.base.DtlsHandshakeCommonBody;
 import network.dtls.type.base.DtlsRandom;
+import util.module.ByteUtil;
 
-public class DtlsServerHello implements DtlsFormat {
+public class DtlsServerHello extends DtlsFormat {
 
-    public static final int LENGTH = 82;
+    public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + 70;
 
-    private DtlsHandshakeType handshakeType; // 1 byte
-    private long length; // 3 bytes
-    private int messageSequence; // 2 bytes
-    private long fragmentOffset; // 3 bytes
-    private long fragmentLength; // 3 bytes
-    private DtlsProtocolVersion protocolVersion; // 2 bytes
-    private final byte[] randomBytes = DtlsRandom.getRandom(); // 32 bytes
+    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
+    private byte[] randomBytes; // 32 bytes (DtlsRandom.getRandom())
     private short sessionIdLength; // 1 byte
-    private final byte[] sessionIdBytes = new byte[32]; // 32 bytes
+    private byte[] sessionIdBytes; // 32 bytes
     private DtlsCipherSuite cipherSuite; // 2 bytes
     private DtlsCompressionMethod dtlsCompressionMethod; // 1 byte
 
-    public DtlsServerHello(DtlsHandshakeType handshakeType, long length, int messageSequence, long fragmentOffset, long fragmentLength, DtlsProtocolVersion protocolVersion, short sessionIdLength, DtlsCipherSuite cipherSuite, DtlsCompressionMethod dtlsCompressionMethod) {
-        this.handshakeType = handshakeType;
-        this.length = length;
-        this.messageSequence = messageSequence;
-        this.fragmentOffset = fragmentOffset;
-        this.fragmentLength = fragmentLength;
-        this.protocolVersion = protocolVersion;
+    public DtlsServerHello(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, byte[] randomBytes, short sessionIdLength, byte[] sessionIdBytes, DtlsCipherSuite cipherSuite, DtlsCompressionMethod dtlsCompressionMethod) {
+        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
+        this.randomBytes = randomBytes;
         this.sessionIdLength = sessionIdLength;
+        this.sessionIdBytes = sessionIdBytes;
         this.cipherSuite = cipherSuite;
         this.dtlsCompressionMethod = dtlsCompressionMethod;
     }
@@ -41,66 +31,85 @@ public class DtlsServerHello implements DtlsFormat {
 
     public DtlsServerHello(byte[] data) {
         if (data.length == LENGTH) {
-            // TODO
+            int index = 0;
+
+            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
+            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
+            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
+            index += commonBodyData.length;
+
+            randomBytes = new byte[DtlsRandom.LENGTH];
+            System.arraycopy(data, index, randomBytes, 0, DtlsRandom.LENGTH);
+            index += DtlsRandom.LENGTH;
+
+            byte[] sessionIdLengthData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, sessionIdLengthData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            byte[] sessionIdLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(sessionIdLengthData, 0, sessionIdLengthData2, ByteUtil.NUM_BYTES_IN_BYTE, ByteUtil.NUM_BYTES_IN_BYTE);
+            sessionIdLength = ByteUtil.bytesToShort(sessionIdLengthData2, true);
+            index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+            sessionIdBytes = new byte[32];
+            System.arraycopy(data, index, sessionIdBytes, 0, 32);
+            index += 32;
+
+            byte[] cipherSuiteData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(data, index, cipherSuiteData, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+            cipherSuite = new DtlsCipherSuite(cipherSuiteData);
+            index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+            byte[] dtlsCompressionMethodData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+            System.arraycopy(data, index, dtlsCompressionMethodData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+            dtlsCompressionMethod = new DtlsCompressionMethod(dtlsCompressionMethodData[0]);
         }
     }
 
+    @Override
     public byte[] getData() {
-        // TODO
         int index = 0;
-        return null;
+        byte[] data = new byte[LENGTH];
+
+        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
+        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
+        index += DtlsHandshakeCommonBody.LENGTH;
+
+        System.arraycopy(randomBytes, 0, data, index, randomBytes.length);
+        index += randomBytes.length;
+
+        byte[] sessionIdLengthData = ByteUtil.shortToBytes(sessionIdLength, true);
+        byte[] sessionIdLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(sessionIdLengthData, ByteUtil.NUM_BYTES_IN_BYTE, sessionIdLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(sessionIdLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+        System.arraycopy(sessionIdBytes, 0, data, index, sessionIdBytes.length);
+        index += sessionIdBytes.length;
+
+        System.arraycopy(cipherSuite.getCipherSuite(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
+        index += ByteUtil.NUM_BYTES_IN_SHORT;
+
+        byte[] dtlsCompressionMethodData = ByteUtil.intToBytes(dtlsCompressionMethod.getMethod(), true);
+        byte[] dtlsCompressionMethodData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(dtlsCompressionMethodData, ByteUtil.NUM_BYTES_IN_SHORT - ByteUtil.NUM_BYTES_IN_BYTE, dtlsCompressionMethodData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(dtlsCompressionMethodData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+
+        return data;
     }
 
-    public DtlsHandshakeType getHandshakeType() {
-        return handshakeType;
+    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
+        return dtlsHandshakeCommonBody;
     }
 
-    public void setHandshakeType(DtlsHandshakeType handshakeType) {
-        this.handshakeType = handshakeType;
-    }
-
-    public long getLength() {
-        return length;
-    }
-
-    public void setLength(long length) {
-        this.length = length;
-    }
-
-    public int getMessageSequence() {
-        return messageSequence;
-    }
-
-    public void setMessageSequence(int messageSequence) {
-        this.messageSequence = messageSequence;
-    }
-
-    public long getFragmentOffset() {
-        return fragmentOffset;
-    }
-
-    public void setFragmentOffset(long fragmentOffset) {
-        this.fragmentOffset = fragmentOffset;
-    }
-
-    public long getFragmentLength() {
-        return fragmentLength;
-    }
-
-    public void setFragmentLength(long fragmentLength) {
-        this.fragmentLength = fragmentLength;
-    }
-
-    public DtlsProtocolVersion getProtocolVersion() {
-        return protocolVersion;
-    }
-
-    public void setProtocolVersion(DtlsProtocolVersion protocolVersion) {
-        this.protocolVersion = protocolVersion;
+    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
+        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
     }
 
     public byte[] getRandomBytes() {
         return randomBytes;
+    }
+
+    public void setRandomBytes(byte[] randomBytes) {
+        this.randomBytes = randomBytes;
     }
 
     public short getSessionIdLength() {
@@ -113,6 +122,10 @@ public class DtlsServerHello implements DtlsFormat {
 
     public byte[] getSessionIdBytes() {
         return sessionIdBytes;
+    }
+
+    public void setSessionIdBytes(byte[] sessionIdBytes) {
+        this.sessionIdBytes = sessionIdBytes;
     }
 
     public DtlsCipherSuite getCipherSuite() {
@@ -130,11 +143,4 @@ public class DtlsServerHello implements DtlsFormat {
     public void setDtlsCompressionMethod(DtlsCompressionMethod dtlsCompressionMethod) {
         this.dtlsCompressionMethod = dtlsCompressionMethod;
     }
-
-    @Override
-    public String toString() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(this);
-    }
-
 }

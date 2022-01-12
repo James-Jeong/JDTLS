@@ -1,26 +1,18 @@
 package network.dtls.type;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import network.dtls.type.base.DtlsHandshakeType;
+import network.dtls.type.base.DtlsFormat;
+import network.dtls.type.base.DtlsHandshakeCommonBody;
 
-public class DtlsClientKeyExchange {
+public class DtlsClientKeyExchange extends DtlsFormat {
 
-    public static final int LENGTH = 12 + 128;
+    public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + 128;
 
-    private DtlsHandshakeType handshakeType; // 1 byte
-    private long length; // 3 bytes
-    private int messageSequence; // 2 bytes
-    private long fragmentOffset; // 3 bytes
-    private long fragmentLength; // 3 bytes
-    private final byte[] encryptedPreMasterSecretData = new byte[128];
+    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody;
+    private byte[] encryptedPreMasterSecretData;
 
-    public DtlsClientKeyExchange(DtlsHandshakeType handshakeType, long length, int messageSequence, long fragmentOffset, long fragmentLength) {
-        this.handshakeType = handshakeType;
-        this.length = length;
-        this.messageSequence = messageSequence;
-        this.fragmentOffset = fragmentOffset;
-        this.fragmentLength = fragmentLength;
+    public DtlsClientKeyExchange(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, byte[] encryptedPreMasterSecretData) {
+        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
+        this.encryptedPreMasterSecretData = encryptedPreMasterSecretData;
     }
 
     public DtlsClientKeyExchange() {}
@@ -29,60 +21,26 @@ public class DtlsClientKeyExchange {
         // TODO
     }
 
+    @Override
     public byte[] getData() {
         // TODO
         int index = 0;
         return null;
     }
 
-    public DtlsHandshakeType getHandshakeType() {
-        return handshakeType;
+    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
+        return dtlsHandshakeCommonBody;
     }
 
-    public void setHandshakeType(DtlsHandshakeType handshakeType) {
-        this.handshakeType = handshakeType;
-    }
-
-    public long getLength() {
-        return length;
-    }
-
-    public void setLength(long length) {
-        this.length = length;
-    }
-
-    public int getMessageSequence() {
-        return messageSequence;
-    }
-
-    public void setMessageSequence(int messageSequence) {
-        this.messageSequence = messageSequence;
-    }
-
-    public long getFragmentOffset() {
-        return fragmentOffset;
-    }
-
-    public void setFragmentOffset(long fragmentOffset) {
-        this.fragmentOffset = fragmentOffset;
-    }
-
-    public long getFragmentLength() {
-        return fragmentLength;
-    }
-
-    public void setFragmentLength(long fragmentLength) {
-        this.fragmentLength = fragmentLength;
+    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
+        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
     }
 
     public byte[] getEncryptedPreMasterSecretData() {
         return encryptedPreMasterSecretData;
     }
 
-    @Override
-    public String toString() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(this);
+    public void setEncryptedPreMasterSecretData(byte[] encryptedPreMasterSecretData) {
+        this.encryptedPreMasterSecretData = encryptedPreMasterSecretData;
     }
-
 }

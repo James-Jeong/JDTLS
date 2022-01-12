@@ -34,7 +34,7 @@ public class ByteUtil {
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
     public static byte[] shortToBytes(short s, boolean isBigEndian) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(NUM_BYTES_IN_BYTE);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(ByteUtil.NUM_BYTES_IN_SHORT);
 
         if (isBigEndian) {
             byteBuffer.order(ByteOrder.BIG_ENDIAN);

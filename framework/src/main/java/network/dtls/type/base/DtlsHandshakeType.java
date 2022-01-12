@@ -23,4 +23,13 @@ public class DtlsHandshakeType {
     public static final int TLS_TYPE_KEY_UPDATE           = 24;
     public static final int TLS_TYPE_MESSAGE_HASH         = 254;
 
+    private final int type;
+
+    public DtlsHandshakeType(int type) {
+        this.type = type;
+    }
+
+    public int getType() {
+        return type;
+    }
 }
