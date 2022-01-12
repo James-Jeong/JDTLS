@@ -10,6 +10,9 @@ public class ByteUtil {
     /** The maximum number of bytes in a UDP packet. */
     public static final int MAX_UDP_PACKET_SIZE = 65537;
 
+    /** Number of bytes in a Java byte. */
+    public static final int NUM_BYTES_IN_BYTE = 1;
+
     /** Number of bytes in a Java short. */
     public static final int NUM_BYTES_IN_SHORT = 2;
 
@@ -31,7 +34,7 @@ public class ByteUtil {
     ////////////////////////////////////////////////////////////
     // FUNCTIONS
     public static byte[] shortToBytes(short s, boolean isBigEndian) {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(NUM_BYTES_IN_SHORT);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(NUM_BYTES_IN_BYTE);
 
         if (isBigEndian) {
             byteBuffer.order(ByteOrder.BIG_ENDIAN);
