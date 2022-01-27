@@ -6,7 +6,7 @@ import network.dtls.type.base.DtlsHandshakeCommonBody;
 
 public class DtlsNewSessionTicket extends DtlsFormat {
 
-    public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + TlsSessionTicket.LENGTH;
+    public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + TlsSessionTicket.MIN_LENGTH;
 
     private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
     private TlsSessionTicket tlsSessionTicket; // 166 bytes
@@ -27,8 +27,8 @@ public class DtlsNewSessionTicket extends DtlsFormat {
             dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
             index += commonBodyData.length;
 
-            byte[] tlsSessionTicketData = new byte[TlsSessionTicket.LENGTH];
-            System.arraycopy(data, index, tlsSessionTicketData, 0, TlsSessionTicket.LENGTH);
+            byte[] tlsSessionTicketData = new byte[TlsSessionTicket.MIN_LENGTH];
+            System.arraycopy(data, index, tlsSessionTicketData, 0, TlsSessionTicket.MIN_LENGTH);
             tlsSessionTicket = new TlsSessionTicket(tlsSessionTicketData);
         }
     }
@@ -45,7 +45,7 @@ public class DtlsNewSessionTicket extends DtlsFormat {
         index += DtlsHandshakeCommonBody.LENGTH;
 
         byte[] tlsSessionTicketData = tlsSessionTicket.getData();
-        System.arraycopy(tlsSessionTicketData, 0, data, index, TlsSessionTicket.LENGTH);
+        System.arraycopy(tlsSessionTicketData, 0, data, index, TlsSessionTicket.MIN_LENGTH);
 
         return data;
     }

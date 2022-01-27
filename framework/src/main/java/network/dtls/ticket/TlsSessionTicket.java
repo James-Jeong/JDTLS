@@ -6,11 +6,11 @@ import util.module.ByteUtil;
 
 public class TlsSessionTicket {
 
-    public static final int LENGTH = 166;
+    public static final int MIN_LENGTH = 6;
 
-    private long lifeTimeHint = 0; // 4 bytes
+    private long lifeTimeHint = 0; // 4 bytes, sec
     private int length = 0; // 2 bytes
-    private byte[] ticket = null; // 160 bytes
+    private byte[] ticket = null; // length bytes
 
     public TlsSessionTicket(long lifeTimeHint, int length, byte[] ticket) {
         this.lifeTimeHint = lifeTimeHint;
@@ -21,7 +21,7 @@ public class TlsSessionTicket {
     public TlsSessionTicket() {}
 
     public TlsSessionTicket(byte[] data) {
-        if (data.length == LENGTH) {
+        if (data.length >= MIN_LENGTH) {
             int index = 0;
 
             byte[] lifeTimeHintData = new byte[ByteUtil.NUM_BYTES_IN_INT];
@@ -47,7 +47,7 @@ public class TlsSessionTicket {
 
     public byte[] getData() {
         int index = 0;
-        byte[] data = new byte[LENGTH];
+        byte[] data = new byte[MIN_LENGTH];
 
         byte[] lifeTimeHintData = ByteUtil.longToBytes(lifeTimeHint, true);
         byte[] lifeTimeHintData2 = new byte[ByteUtil.NUM_BYTES_IN_INT];
@@ -62,6 +62,9 @@ public class TlsSessionTicket {
         index += ByteUtil.NUM_BYTES_IN_SHORT;
 
         if (length > 0 && ticket != null && ticket.length > 0) {
+            byte[] newData = new byte[MIN_LENGTH + length];
+            System.arraycopy(data, 0, newData, 0, MIN_LENGTH);
+            data = newData;
             System.arraycopy(ticket, 0, data, index, length);
         }
 
