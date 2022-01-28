@@ -5,8 +5,11 @@ import com.google.gson.GsonBuilder;
 
 public class DtlsEncryptedHandShake implements DtlsHandshakeFactory {
 
+    ////////////////////////////////////////////////////////////
     private byte[] encryptedMessage;
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsEncryptedHandShake() {}
 
     public DtlsEncryptedHandShake(byte[] data) {
@@ -15,7 +18,10 @@ public class DtlsEncryptedHandShake implements DtlsHandshakeFactory {
             System.arraycopy(data, 0, encryptedMessage, 0, data.length);
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
+    @Override
     public byte[] getData() {
         if (encryptedMessage == null) { return null; }
 
@@ -24,11 +30,14 @@ public class DtlsEncryptedHandShake implements DtlsHandshakeFactory {
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     @Override
     public String toString() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+    ////////////////////////////////////////////////////////////
 
 }

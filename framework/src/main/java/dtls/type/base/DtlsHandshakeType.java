@@ -1,5 +1,8 @@
 package dtls.type.base;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class DtlsHandshakeType {
 
     public static final int TLS_TYPE_HELLO_REQUEST        = 0;
@@ -32,4 +35,11 @@ public class DtlsHandshakeType {
     public int getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
+    }
+
 }

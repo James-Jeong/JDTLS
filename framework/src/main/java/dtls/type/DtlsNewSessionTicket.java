@@ -1,8 +1,8 @@
 package dtls.type;
 
+import dtls.ticket.TlsSessionTicket;
 import dtls.type.base.DtlsFormat;
 import dtls.type.base.DtlsHandshakeCommonBody;
-import dtls.ticket.TlsSessionTicket;
 
 public class DtlsNewSessionTicket extends DtlsFormat {
 

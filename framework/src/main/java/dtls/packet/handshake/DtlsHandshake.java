@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dtls.type.*;
 import dtls.type.base.DtlsFormat;
-import network.dtls.type.*;
 import dtls.type.base.DtlsHandshakeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +97,7 @@ public class DtlsHandshake implements DtlsHandshakeFactory {
         }
     }
 
+    @Override
     public byte[] getData() {
         if (dtlsFormat == null) { return null; }
         return dtlsFormat.getData();

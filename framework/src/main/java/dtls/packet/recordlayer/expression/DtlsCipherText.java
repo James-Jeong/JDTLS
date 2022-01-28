@@ -2,8 +2,8 @@ package dtls.packet.recordlayer.expression;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dtls.packet.recordlayer.DtlsRecordHeader;
 import dtls.packet.base.DtlsCipherType;
+import dtls.packet.recordlayer.DtlsRecordHeader;
 
 public class DtlsCipherText {
 

@@ -16,8 +16,13 @@ import java.util.List;
  */
 public class DtlsPacket {
 
+    ////////////////////////////////////////////////////////////
     private List<DtlsRecordLayer> dtlsRecordLayerList = null;
 
+    private int length = 0;
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
     public DtlsPacket(List<DtlsRecordLayer> dtlsHandShakeList) {
         this.dtlsRecordLayerList = dtlsHandShakeList;
     }
@@ -59,25 +64,25 @@ public class DtlsPacket {
                         byte[] dtlsHandShakeData = new byte[handshakeDataLength];
                         System.arraycopy(data, index, dtlsHandShakeData, 0, handshakeDataLength);
                         index += handshakeDataLength;
-                        DtlsHandshake dtlsHandshake = new DtlsHandshake(dtlsHandshakeCommonBody.getHandshakeType(), dtlsHandShakeData);
 
+                        DtlsHandshake dtlsHandshake = new DtlsHandshake(dtlsHandshakeCommonBody.getHandshakeType(), dtlsHandShakeData);
                         dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsHandshake);
                     }
 
                     dtlsRecordLayerList.add(dtlsRecordLayer);
                 }
             }
+            length = index;
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public byte[] getData() {
-        if (dtlsRecordLayerList == null) { return null; }
+        if (dtlsRecordLayerList == null || length == 0) { return null; }
 
         int index = 0;
-        int totalDataLength = getRecordLayerTotalSize();
-        if (totalDataLength <= 0) { return null; }
-
-        byte[] data = new byte[totalDataLength];
+        byte[] data = new byte[length];
 
         for (DtlsRecordLayer dtlsRecordLayer : dtlsRecordLayerList) {
             if (dtlsRecordLayer == null) { continue; }
@@ -89,7 +94,9 @@ public class DtlsPacket {
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public List<DtlsRecordLayer> getDtlsRecordLayerList() {
         return dtlsRecordLayerList;
     }
@@ -98,19 +105,8 @@ public class DtlsPacket {
         this.dtlsRecordLayerList = dtlsRecordLayerList;
     }
 
-    public int getRecordLayerTotalSize() {
-        int totalSize = 0;
-
-        for (DtlsRecordLayer dtlsRecordLayer : dtlsRecordLayerList) {
-            if (dtlsRecordLayer == null) { continue; }
-
-            byte[] dtlsRecordLayerData = dtlsRecordLayer.getData();
-            if (dtlsRecordLayerData != null) {
-                totalSize += dtlsRecordLayerData.length;
-            }
-        }
-
-        return totalSize;
+    public int getLength() {
+        return length;
     }
 
     @Override
@@ -118,5 +114,6 @@ public class DtlsPacket {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+    ////////////////////////////////////////////////////////////
 
 }

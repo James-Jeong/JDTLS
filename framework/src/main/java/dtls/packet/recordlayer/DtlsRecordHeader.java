@@ -8,6 +8,7 @@ import util.module.ByteUtil;
 
 public class DtlsRecordHeader {
 
+    ////////////////////////////////////////////////////////////
     public static final int LENGTH = 13;
 
     // DTLS Record type (message type)
@@ -25,7 +26,9 @@ public class DtlsRecordHeader {
 
     // Record layer 총 바이트 수
     private int length = 0; // 2 bytes
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsRecordHeader(DtlsContentType contentType, DtlsProtocolVersion protocolVersion, int epoch, long sequenceNumber, int length) {
         this.contentType = contentType;
         this.protocolVersion = protocolVersion;
@@ -73,7 +76,9 @@ public class DtlsRecordHeader {
             length = ByteUtil.bytesToInt(lengthData2, true);
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public byte[] getData() {
         int index = 0;
         byte[] data = new byte[LENGTH];
@@ -107,6 +112,9 @@ public class DtlsRecordHeader {
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
     public DtlsContentType getContentType() {
         return contentType;
     }
@@ -152,5 +160,6 @@ public class DtlsRecordHeader {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+    ////////////////////////////////////////////////////////////
 
 }
