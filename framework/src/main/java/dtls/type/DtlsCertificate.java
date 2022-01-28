@@ -7,13 +7,17 @@ import util.module.ByteUtil;
 
 public class DtlsCertificate extends DtlsFormat {
 
+    ////////////////////////////////////////////////////////////
     public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 3;
 
     private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
     private long certificatesLength; // 3 bytes
     private Certificates certificates; // certificatesLength bytes
+    ////////////////////////////////////////////////////////////
 
-    public DtlsCertificate(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, long certificatesLength, Certificates certificates) {
+    ////////////////////////////////////////////////////////////
+    public DtlsCertificate(DtlsHandshakeCommonBody dtlsHandshakeCommonBody,
+                           long certificatesLength, Certificates certificates) {
         this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
         this.certificatesLength = certificatesLength;
         this.certificates = certificates;
@@ -44,7 +48,9 @@ public class DtlsCertificate extends DtlsFormat {
             }
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
         if (dtlsHandshakeCommonBody == null || certificates == null) { return null; }
@@ -79,7 +85,9 @@ public class DtlsCertificate extends DtlsFormat {
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
         return dtlsHandshakeCommonBody;
     }
@@ -103,5 +111,6 @@ public class DtlsCertificate extends DtlsFormat {
     public void setCertificates(Certificates certificates) {
         this.certificates = certificates;
     }
+    ////////////////////////////////////////////////////////////
 
 }

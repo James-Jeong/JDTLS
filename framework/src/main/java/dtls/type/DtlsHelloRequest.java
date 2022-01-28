@@ -5,10 +5,13 @@ import dtls.type.base.DtlsHandshakeCommonBody;
 
 public class DtlsHelloRequest extends DtlsFormat {
 
+    ////////////////////////////////////////////////////////////
     public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH;
 
     private DtlsHandshakeCommonBody dtlsHandshakeCommonBody;
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsHelloRequest(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
         this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
     }
@@ -18,7 +21,16 @@ public class DtlsHelloRequest extends DtlsFormat {
     public DtlsHelloRequest(byte[] data) {
         // TODO
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
+    @Override
+    public byte[] getData() {
+        return new byte[0];
+    }
+    ////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
         return dtlsHandshakeCommonBody;
     }
@@ -26,10 +38,6 @@ public class DtlsHelloRequest extends DtlsFormat {
     public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
         this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
     }
-
-    @Override
-    public byte[] getData() {
-        return new byte[0];
-    }
+    ////////////////////////////////////////////////////////////
 
 }

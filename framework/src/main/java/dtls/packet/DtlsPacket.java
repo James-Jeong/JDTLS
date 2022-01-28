@@ -25,6 +25,11 @@ public class DtlsPacket {
     ////////////////////////////////////////////////////////////
     public DtlsPacket(List<DtlsRecordLayer> dtlsHandShakeList) {
         this.dtlsRecordLayerList = dtlsHandShakeList;
+        for (DtlsRecordLayer dtlsRecordLayer : dtlsRecordLayerList) {
+            if (dtlsRecordLayer == null) { continue; }
+
+            this.length += dtlsRecordLayer.getLength();
+        }
     }
 
     public DtlsPacket() {}

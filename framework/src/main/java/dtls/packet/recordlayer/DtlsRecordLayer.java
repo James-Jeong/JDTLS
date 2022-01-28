@@ -2,7 +2,6 @@ package dtls.packet.recordlayer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dtls.packet.base.DtlsContentType;
 import dtls.packet.handshake.DtlsEncryptedHandShake;
 import dtls.packet.handshake.DtlsHandshake;
 import dtls.packet.handshake.DtlsHandshakeFactory;
@@ -21,6 +20,13 @@ public class DtlsRecordLayer {
     public DtlsRecordLayer(DtlsRecordHeader recordHeader, DtlsHandshakeFactory dtlsHandshakeFactory) {
         this.dtlsRecordHeader = recordHeader;
         this.dtlsHandshakeFactory = dtlsHandshakeFactory;
+
+        int dtlsHandshakeLength = 0;
+        if (this.dtlsHandshakeFactory.getData() != null) {
+            dtlsHandshakeLength = this.dtlsHandshakeFactory.getData().length;
+        }
+
+        this.length = DtlsRecordHeader.LENGTH + dtlsHandshakeLength;
     }
 
     public DtlsRecordLayer() {}

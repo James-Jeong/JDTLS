@@ -6,9 +6,12 @@ import util.module.ByteUtil;
 
 public class Certificates {
 
+    ////////////////////////////////////////////////////////////
     private long length; // 3 bytes
-    private byte[] certificate; // length bytes
+    transient private byte[] certificate; // length bytes
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public Certificates(long length, byte[] certificate) {
         this.length = length;
         this.certificate = certificate;
@@ -33,33 +36,28 @@ public class Certificates {
             }
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public byte[] getData() {
         int index = 0;
-        byte[] data;
+        byte[] data = new byte[3 + (int) length];
 
-        if (length > 0) {
-            data = new byte[3 + certificate.length];
+        byte[] lengthData = ByteUtil.longToBytes(length, true);
+        byte[] lengthData2 = new byte[3];
+        System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_LONG - 3, lengthData2, 0, 3);
+        System.arraycopy(lengthData2, 0, data, index, 3);
+        index += 3;
 
-            byte[] lengthData = ByteUtil.longToBytes(length, true);
-            byte[] lengthData2 = new byte[3];
-            System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_LONG - 3, lengthData2, 0, 3);
-            System.arraycopy(lengthData2, 0, data, index, 3);
-            index += 3;
-
-            System.arraycopy(certificate, 0, data, index, certificate.length);
-        } else {
-            data = new byte[3];
-
-            byte[] lengthData = ByteUtil.longToBytes(length, true);
-            byte[] lengthData2 = new byte[3];
-            System.arraycopy(lengthData, ByteUtil.NUM_BYTES_IN_LONG - 3, lengthData2, 0, 3);
-            System.arraycopy(lengthData2, 0, data, index, 3);
+        if (length > 0 && certificate != null) {
+            System.arraycopy(certificate, 0, data, index, (int) length);
         }
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public long getLength() {
         return length;
     }
@@ -81,5 +79,6 @@ public class Certificates {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+    ////////////////////////////////////////////////////////////
 
 }

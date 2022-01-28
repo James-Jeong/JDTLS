@@ -9,16 +9,23 @@ import util.module.ByteUtil;
 
 public class DtlsServerHello extends DtlsFormat {
 
+    ////////////////////////////////////////////////////////////
     public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + 70;
 
     private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
-    private byte[] randomBytes; // 32 bytes (DtlsRandom.getRandom())
+    transient private byte[] randomBytes; // 32 bytes (DtlsRandom.getRandom())
     private short sessionIdLength; // 1 byte
-    private byte[] sessionIdBytes; // 32 bytes
+    transient private byte[] sessionIdBytes; // 32 bytes
     private DtlsCipherSuite cipherSuite; // 2 bytes
     private DtlsCompressionMethodType dtlsCompressionMethod; // 1 byte
+    ////////////////////////////////////////////////////////////
 
-    public DtlsServerHello(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, byte[] randomBytes, short sessionIdLength, byte[] sessionIdBytes, DtlsCipherSuite cipherSuite, DtlsCompressionMethodType dtlsCompressionMethod) {
+    ////////////////////////////////////////////////////////////
+    public DtlsServerHello(DtlsHandshakeCommonBody dtlsHandshakeCommonBody,
+                           byte[] randomBytes,
+                           short sessionIdLength, byte[] sessionIdBytes,
+                           DtlsCipherSuite cipherSuite,
+                           DtlsCompressionMethodType dtlsCompressionMethod) {
         this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
         this.randomBytes = randomBytes;
         this.sessionIdLength = sessionIdLength;
@@ -63,7 +70,9 @@ public class DtlsServerHello extends DtlsFormat {
             dtlsCompressionMethod = new DtlsCompressionMethodType(dtlsCompressionMethodData[0]);
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
         if (dtlsHandshakeCommonBody == null || randomBytes == null || sessionIdBytes == null
@@ -98,7 +107,9 @@ public class DtlsServerHello extends DtlsFormat {
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
         return dtlsHandshakeCommonBody;
     }
@@ -146,4 +157,6 @@ public class DtlsServerHello extends DtlsFormat {
     public void setDtlsCompressionMethod(DtlsCompressionMethodType dtlsCompressionMethod) {
         this.dtlsCompressionMethod = dtlsCompressionMethod;
     }
+    ////////////////////////////////////////////////////////////
+
 }

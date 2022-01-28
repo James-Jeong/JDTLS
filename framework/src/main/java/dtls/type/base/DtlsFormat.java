@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 
 public abstract class DtlsFormat {
 
+    ////////////////////////////////////////////////////////////
     public byte[] getData() {
         return null;
     }
@@ -14,5 +15,6 @@ public abstract class DtlsFormat {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+    ////////////////////////////////////////////////////////////
 
 }

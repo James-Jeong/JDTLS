@@ -7,13 +7,16 @@ import util.module.ByteUtil;
 
 public class DtlsHelloVerifyRequest extends DtlsFormat {
 
+    ////////////////////////////////////////////////////////////
     public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 3;
 
     private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
     private DtlsProtocolVersion protocolVersion; // 2 bytes
     private short cookieLength; // 1 byte
-    private byte[] cookie; // cookieLength bytes
+    transient private byte[] cookie; // cookieLength bytes
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsHelloVerifyRequest(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, DtlsProtocolVersion protocolVersion, short cookieLength, byte[] cookie) {
         this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
         this.protocolVersion = protocolVersion;
@@ -50,50 +53,35 @@ public class DtlsHelloVerifyRequest extends DtlsFormat {
             }
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
         if (dtlsHandshakeCommonBody == null || protocolVersion == null) { return null; }
 
         int index = 0;
-        byte[] data;
+        byte[] data = new byte[MIN_LENGTH + cookieLength];
+
+        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
+        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
+        index += DtlsHandshakeCommonBody.LENGTH;
+
+        byte[] cookieLengthData = ByteUtil.shortToBytes(cookieLength, true);
+        byte[] cookieLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
+        System.arraycopy(cookieLengthData, ByteUtil.NUM_BYTES_IN_BYTE, cookieLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
+        System.arraycopy(cookieLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
+        index += ByteUtil.NUM_BYTES_IN_BYTE;
 
         if (cookieLength > 0 && cookie != null) {
-            data = new byte[MIN_LENGTH + cookieLength];
-
-            byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-            index += DtlsHandshakeCommonBody.LENGTH;
-
-            System.arraycopy(protocolVersion.getVersion(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
-            index += ByteUtil.NUM_BYTES_IN_SHORT;
-
-            byte[] cookieLengthData = ByteUtil.shortToBytes(cookieLength, true);
-            byte[] cookieLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
-            System.arraycopy(cookieLengthData, ByteUtil.NUM_BYTES_IN_BYTE, cookieLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
-            System.arraycopy(cookieLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
-            index += ByteUtil.NUM_BYTES_IN_BYTE;
-
             System.arraycopy(cookie, 0, data, index, cookieLength);
-        } else {
-            data = new byte[MIN_LENGTH];
-
-            byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-            index += DtlsHandshakeCommonBody.LENGTH;
-
-            System.arraycopy(protocolVersion.getVersion(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
-            index += ByteUtil.NUM_BYTES_IN_SHORT;
-
-            byte[] cookieLengthData = ByteUtil.shortToBytes(cookieLength, true);
-            byte[] cookieLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
-            System.arraycopy(cookieLengthData, ByteUtil.NUM_BYTES_IN_BYTE, cookieLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
-            System.arraycopy(cookieLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
         }
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
         return dtlsHandshakeCommonBody;
     }
@@ -125,5 +113,6 @@ public class DtlsHelloVerifyRequest extends DtlsFormat {
     public void setCookie(byte[] cookie) {
         this.cookie = cookie;
     }
+    ////////////////////////////////////////////////////////////
 
 }

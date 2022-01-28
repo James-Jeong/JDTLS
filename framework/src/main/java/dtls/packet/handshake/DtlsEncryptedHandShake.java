@@ -6,7 +6,8 @@ import com.google.gson.GsonBuilder;
 public class DtlsEncryptedHandShake implements DtlsHandshakeFactory {
 
     ////////////////////////////////////////////////////////////
-    private byte[] encryptedMessage;
+    transient private byte[] encryptedMessage = null;
+    private int encryptedMessageLength = 0;
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
@@ -16,6 +17,7 @@ public class DtlsEncryptedHandShake implements DtlsHandshakeFactory {
         if (data.length > 0) {
             encryptedMessage = new byte[data.length];
             System.arraycopy(data, 0, encryptedMessage, 0, data.length);
+            encryptedMessageLength = encryptedMessage.length;
         }
     }
     ////////////////////////////////////////////////////////////
@@ -33,6 +35,22 @@ public class DtlsEncryptedHandShake implements DtlsHandshakeFactory {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
+    public byte[] getEncryptedMessage() {
+        return encryptedMessage;
+    }
+
+    public void setEncryptedMessage(byte[] encryptedMessage) {
+        this.encryptedMessage = encryptedMessage;
+    }
+
+    public int getEncryptedMessageLength() {
+        return encryptedMessageLength;
+    }
+
+    public void setEncryptedMessageLength(int encryptedMessageLength) {
+        this.encryptedMessageLength = encryptedMessageLength;
+    }
+
     @Override
     public String toString() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
