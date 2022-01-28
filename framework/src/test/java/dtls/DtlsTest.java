@@ -108,6 +108,7 @@ public class DtlsTest {
         /////////////////////////////////////////////////////////
         // EncryptedDtlsHandshake
         DtlsEncryptedHandShake dtlsEncryptedHandShake = createDtlsEncryptedHandshakeTest();
+        Assert.assertNotNull(dtlsEncryptedHandShake);
         /////////////////////////////////////////////////////////
 
         /////////////////////////////////////////////////////////

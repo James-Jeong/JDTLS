@@ -10,10 +10,10 @@ public class DtlsHelloVerifyRequest extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 3;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
-    private DtlsProtocolVersion protocolVersion; // 2 bytes
-    private short cookieLength; // 1 byte
-    transient private byte[] cookie; // cookieLength bytes
+    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null; // 12 bytes
+    private DtlsProtocolVersion protocolVersion = null; // 2 bytes
+    private short cookieLength = 0; // 1 byte
+    transient private byte[] cookie = null; // cookieLength bytes
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////

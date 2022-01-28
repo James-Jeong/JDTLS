@@ -8,7 +8,7 @@ public class DtlsFinished extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody;
+    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null;
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////

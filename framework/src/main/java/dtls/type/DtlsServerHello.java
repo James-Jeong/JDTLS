@@ -12,12 +12,12 @@ public class DtlsServerHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + 70;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
-    transient private byte[] randomBytes; // 32 bytes (DtlsRandom.getRandom())
-    private short sessionIdLength; // 1 byte
-    transient private byte[] sessionIdBytes; // 32 bytes
-    private DtlsCipherSuite cipherSuite; // 2 bytes
-    private DtlsCompressionMethodType dtlsCompressionMethod; // 1 byte
+    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null; // 12 bytes
+    transient private byte[] randomBytes = null; // 32 bytes (DtlsRandom.getRandom())
+    private short sessionIdLength = 0; // 1 byte
+    transient private byte[] sessionIdBytes = null; // 32 bytes
+    private DtlsCipherSuite cipherSuite = null; // 2 bytes
+    private DtlsCompressionMethodType dtlsCompressionMethod = null; // 1 byte
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////

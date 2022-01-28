@@ -10,9 +10,9 @@ public class DtlsCertificate extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 3;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody; // 12 bytes
-    private long certificatesLength; // 3 bytes
-    private Certificates certificates; // certificatesLength bytes
+    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null; // 12 bytes
+    private long certificatesLength = 0; // 3 bytes
+    private Certificates certificates = null; // certificatesLength bytes
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
