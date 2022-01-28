@@ -1,15 +1,14 @@
 package dtls;
 
-import network.dtls.cipher.DtlsCipherSuite;
-import network.dtls.cipher.DtlsCipherSuiteList;
-import network.dtls.cipher.DtlsCipherSuiteType;
-import network.dtls.compression.DtlsCompressionMethod;
-import network.dtls.packet.DtlsPacket;
-import network.dtls.packet.base.DtlsProtocolVersion;
-import network.dtls.type.DtlsClientHello;
-import network.dtls.type.base.DtlsHandshakeCommonBody;
-import network.dtls.type.base.DtlsHandshakeType;
-import network.dtls.type.base.DtlsRandom;
+import dtls.cipher.DtlsCipherSuite;
+import dtls.cipher.DtlsCipherSuiteList;
+import dtls.cipher.DtlsCipherSuiteType;
+import dtls.compression.DtlsCompressionMethodType;
+import dtls.packet.base.DtlsProtocolVersion;
+import dtls.type.DtlsClientHello;
+import dtls.type.base.DtlsHandshakeCommonBody;
+import dtls.type.base.DtlsHandshakeType;
+import dtls.type.base.DtlsRandom;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -73,7 +72,7 @@ public class DtlsTest {
                 new DtlsProtocolVersion(DtlsProtocolVersion.DTLS_1_0), DtlsRandom.getRandom(),
                 (short) 8, (short) 0,
                 dtlsCipherSuiteList.getTotalLength(), dtlsCipherSuiteList,
-                (short) 1, new DtlsCompressionMethod(DtlsCompressionMethod.TLS_COMPRESSION_METHOD_NULL)
+                (short) 1, new DtlsCompressionMethodType(DtlsCompressionMethodType.TLS_COMPRESSION_METHOD_NULL)
         );
         logger.debug("[DtlsTest][createDtlsClientHelloTest] DtlsClientHello: {}", dtlsClientHello);
 
