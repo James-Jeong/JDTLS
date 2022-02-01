@@ -2,23 +2,20 @@ package dtls.type;
 
 import dtls.certificate.Certificates;
 import dtls.type.base.DtlsFormat;
-import dtls.type.base.DtlsHandshakeCommonBody;
 import util.module.ByteUtil;
 
 public class DtlsCertificate extends DtlsFormat {
 
     ////////////////////////////////////////////////////////////
-    public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 3;
+    public static final int MIN_LENGTH = 3;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null; // 12 bytes
     private long certificatesLength = 0; // 3 bytes
     private Certificates certificates = null; // certificatesLength bytes
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsCertificate(DtlsHandshakeCommonBody dtlsHandshakeCommonBody,
-                           long certificatesLength, Certificates certificates) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
+    public DtlsCertificate(
+            long certificatesLength, Certificates certificates) {
         this.certificatesLength = certificatesLength;
         this.certificates = certificates;
     }
@@ -28,11 +25,6 @@ public class DtlsCertificate extends DtlsFormat {
     public DtlsCertificate(byte[] data) {
         if (data.length >= MIN_LENGTH) {
             int index = 0;
-
-            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
-            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
-            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
-            index += commonBodyData.length;
 
             byte[] certificatesLengthData = new byte[3];
             System.arraycopy(data, index, certificatesLengthData, 0, 3);
@@ -53,16 +45,13 @@ public class DtlsCertificate extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
-        if (dtlsHandshakeCommonBody == null || certificates == null) { return null; }
+        if (certificates == null) { return null; }
 
         int index = 0;
 
         byte[] data;
-        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
         if (certificatesLength > 0) {
             data = new byte[MIN_LENGTH + (int) certificatesLength];
-            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-            index += DtlsHandshakeCommonBody.LENGTH;
 
             byte[] certificatesLengthData = ByteUtil.longToBytes(certificatesLength, true);
             byte[] certificatesLengthData2 = new byte[3];
@@ -74,8 +63,6 @@ public class DtlsCertificate extends DtlsFormat {
             System.arraycopy(certificatesData, 0, data, index, certificatesData.length);
         } else {
             data = new byte[MIN_LENGTH];
-            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-            index += DtlsHandshakeCommonBody.LENGTH;
 
             byte[] certificatesLengthData = ByteUtil.longToBytes(certificatesLength, true);
             byte[] certificatesLengthData2 = new byte[3];
@@ -88,14 +75,6 @@ public class DtlsCertificate extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
-        return dtlsHandshakeCommonBody;
-    }
-
-    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
-
     public long getCertificatesLength() {
         return certificatesLength;
     }

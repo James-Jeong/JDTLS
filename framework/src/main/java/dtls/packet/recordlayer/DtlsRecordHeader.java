@@ -90,7 +90,7 @@ public class DtlsRecordHeader {
         index += ByteUtil.NUM_BYTES_IN_BYTE;
 
         byte[] protocolVersionData = protocolVersion.getVersion();
-        System.arraycopy(protocolVersionData, ByteUtil.NUM_BYTES_IN_SHORT, data, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+        System.arraycopy(protocolVersionData, 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
         index += ByteUtil.NUM_BYTES_IN_SHORT;
 
         byte[] epochData = ByteUtil.intToBytes(epoch, true);

@@ -1,7 +1,6 @@
 package dtls.type;
 
 import dtls.type.base.DtlsFormat;
-import dtls.type.base.DtlsHandshakeCommonBody;
 
 /**
  * - This message carries the keys exchange algorithm parameters
@@ -16,37 +15,23 @@ import dtls.type.base.DtlsHandshakeCommonBody;
 public class DtlsServerKeyExchange extends DtlsFormat {
 
     ////////////////////////////////////////////////////////////
-    public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH;
+    public static final int MIN_LENGTH = 0;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null;
     transient private byte[] encryptedPreMasterSecretData = null;
     private int encryptedPreMasterSecretDataLength = 0;
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsServerKeyExchange(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, byte[] encryptedPreMasterSecretData) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-        this.encryptedPreMasterSecretData = encryptedPreMasterSecretData;
-        this.encryptedPreMasterSecretDataLength = encryptedPreMasterSecretData.length;
-    }
-
     public DtlsServerKeyExchange() {}
 
     public DtlsServerKeyExchange(byte[] data) {
-        if (data.length >= MIN_LENGTH) {
-            int index = 0;
+        int index = 0;
 
-            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
-            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
-            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
-            index += commonBodyData.length;
-
-            int remainLength = data.length - index;
-            if (remainLength > 0) {
-                encryptedPreMasterSecretData = new byte[remainLength];
-                System.arraycopy(data, index, encryptedPreMasterSecretData, 0, remainLength);
-                encryptedPreMasterSecretDataLength = encryptedPreMasterSecretData.length;
-            }
+        int remainLength = data.length - index;
+        if (remainLength > 0) {
+            encryptedPreMasterSecretData = new byte[remainLength];
+            System.arraycopy(data, index, encryptedPreMasterSecretData, 0, remainLength);
+            encryptedPreMasterSecretDataLength = encryptedPreMasterSecretData.length;
         }
     }
     ////////////////////////////////////////////////////////////
@@ -54,21 +39,14 @@ public class DtlsServerKeyExchange extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
-        if (dtlsHandshakeCommonBody == null || encryptedPreMasterSecretData == null) { return null; }
+        if (encryptedPreMasterSecretData == null) { return null; }
 
         int index = 0;
-        byte[] data;
+        byte[] data = null;
 
         if (encryptedPreMasterSecretData.length > 0) {
-            data = new byte[MIN_LENGTH + encryptedPreMasterSecretData.length];
-            byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-            index += DtlsHandshakeCommonBody.LENGTH;
+            data = new byte[encryptedPreMasterSecretData.length];
             System.arraycopy(encryptedPreMasterSecretData, 0, data, index, encryptedPreMasterSecretData.length);
-        } else {
-            data = new byte[MIN_LENGTH];
-            byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-            System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
         }
 
         return data;
@@ -76,14 +54,6 @@ public class DtlsServerKeyExchange extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
-        return dtlsHandshakeCommonBody;
-    }
-
-    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
-
     public byte[] getEncryptedPreMasterSecretData() {
         return encryptedPreMasterSecretData;
     }
@@ -99,7 +69,6 @@ public class DtlsServerKeyExchange extends DtlsFormat {
     public void setEncryptedPreMasterSecretDataLength(int encryptedPreMasterSecretDataLength) {
         this.encryptedPreMasterSecretDataLength = encryptedPreMasterSecretDataLength;
     }
-
     ////////////////////////////////////////////////////////////
 
 }

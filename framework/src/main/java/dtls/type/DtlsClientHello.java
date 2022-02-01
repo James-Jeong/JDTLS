@@ -4,21 +4,19 @@ import dtls.cipher.DtlsCipherSuiteList;
 import dtls.compression.DtlsCompressionMethodType;
 import dtls.packet.base.DtlsProtocolVersion;
 import dtls.type.base.DtlsFormat;
-import dtls.type.base.DtlsHandshakeCommonBody;
 import dtls.type.base.DtlsRandom;
 import util.module.ByteUtil;
 
 public class DtlsClientHello extends DtlsFormat {
 
     ////////////////////////////////////////////////////////////
-    public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 40;
+    public static final int MIN_LENGTH = 40;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null; // 12 bytes
     private DtlsProtocolVersion protocolVersion = null; // 2 bytes
     transient private byte[] randomBytes = null; // 32 bytes > DtlsRandom.getRandom()
     private short sessionIdLength = 0; // 1 byte
     private short cookieLength = 0; // 1 byte
-    transient private byte[] cookie = null; // 1 byte
+    transient private byte[] cookie = null; // cookieLength bytes
     private int cipherSuitesLength = 0; // 2 bytes
     private DtlsCipherSuiteList dtlsCipherSuiteList = null; // cipherSuitesLength bytes
     private short compressionMethodsLength = 0; // 1 byte
@@ -26,12 +24,10 @@ public class DtlsClientHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsClientHello(DtlsHandshakeCommonBody dtlsHandshakeCommonBody,
-                           DtlsProtocolVersion protocolVersion, byte[] randomBytes,
+    public DtlsClientHello(DtlsProtocolVersion protocolVersion, byte[] randomBytes,
                            short sessionIdLength, short cookieLength, byte[] cookie,
                            int cipherSuitesLength, DtlsCipherSuiteList dtlsCipherSuiteList,
                            short compressionMethodsLength, DtlsCompressionMethodType compressionMethod) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
         this.protocolVersion = protocolVersion;
         this.randomBytes = randomBytes;
         this.sessionIdLength = sessionIdLength;
@@ -48,11 +44,6 @@ public class DtlsClientHello extends DtlsFormat {
     public DtlsClientHello(byte[] data) {
         if (data.length >= MIN_LENGTH) {
             int index = 0;
-
-            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
-            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
-            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
-            index += commonBodyData.length;
 
             byte[] protocolVersionData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
             System.arraycopy(data, index, protocolVersionData, 0, ByteUtil.NUM_BYTES_IN_SHORT);
@@ -114,14 +105,10 @@ public class DtlsClientHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
-        if (dtlsHandshakeCommonBody == null || protocolVersion == null || randomBytes == null || dtlsCompressionMethod == null) { return null; }
+        if (protocolVersion == null || randomBytes == null || dtlsCompressionMethod == null) { return null; }
 
         int index = 0;
-        byte[] data = new byte[MIN_LENGTH + cipherSuitesLength];
-
-        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-        index += DtlsHandshakeCommonBody.LENGTH;
+        byte[] data = new byte[MIN_LENGTH + cookieLength + cipherSuitesLength];
 
         System.arraycopy(protocolVersion.getVersion(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
         index += ByteUtil.NUM_BYTES_IN_SHORT;
@@ -152,7 +139,7 @@ public class DtlsClientHello extends DtlsFormat {
         System.arraycopy(cipherSuitesLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
         index += ByteUtil.NUM_BYTES_IN_SHORT;
 
-        if (dtlsCipherSuiteList != null) {
+        if (cipherSuitesLength > 0 && dtlsCipherSuiteList != null) {
             byte[] dtlsCipherSuiteListData = dtlsCipherSuiteList.getData();
             if (dtlsCipherSuiteListData.length > 0) {
                 System.arraycopy(dtlsCipherSuiteListData, 0, data, index, dtlsCipherSuiteListData.length);
@@ -176,14 +163,6 @@ public class DtlsClientHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
-        return dtlsHandshakeCommonBody;
-    }
-
-    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
-
     public DtlsProtocolVersion getProtocolVersion() {
         return protocolVersion;
     }

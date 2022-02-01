@@ -6,7 +6,6 @@ import dtls.packet.handshake.DtlsEncryptedHandShake;
 import dtls.packet.handshake.DtlsHandshake;
 import dtls.packet.recordlayer.DtlsRecordHeader;
 import dtls.packet.recordlayer.DtlsRecordLayer;
-import dtls.type.base.DtlsHandshakeCommonBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class DtlsPacket {
     public DtlsPacket() {}
 
     public DtlsPacket(byte[] data) {
-        if (data.length > DtlsRecordHeader.LENGTH) {
+        if (data.length >= DtlsRecordHeader.LENGTH) {
             int index = 0;
             dtlsRecordLayerList = new ArrayList<>();
 
@@ -48,29 +47,17 @@ public class DtlsPacket {
                 DtlsRecordHeader dtlsRecordHeader = new DtlsRecordHeader(dtlsRecordHeaderData);
                 int length = dtlsRecordHeader.getLength();
                 if (length > 0) {
+                    byte[] handShakeData = new byte[length];
+                    System.arraycopy(data, index, handShakeData, 0, length);
+                    index += length;
+
                     DtlsRecordLayer dtlsRecordLayer;
                     int epoch = dtlsRecordHeader.getEpoch();
                     if (epoch != 0) { // Encrypted
-                        byte[] encryptedHandShakeData = new byte[length];
-                        System.arraycopy(data, index, encryptedHandShakeData, 0, length);
-                        index += length;
-
-                        DtlsEncryptedHandShake dtlsEncryptedHandShake = new DtlsEncryptedHandShake(encryptedHandShakeData);
+                        DtlsEncryptedHandShake dtlsEncryptedHandShake = new DtlsEncryptedHandShake(handShakeData);
                         dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsEncryptedHandShake);
                     } else { // Not encrypted
-                        byte[] dtlsHandShakeCommonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
-                        System.arraycopy(data, index, dtlsHandShakeCommonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
-                        index += DtlsHandshakeCommonBody.LENGTH;
-                        DtlsHandshakeCommonBody dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(dtlsHandShakeCommonBodyData);
-
-                        int handshakeDataLength = (int) dtlsHandshakeCommonBody.getLength();
-                        if (handshakeDataLength == 0) { continue; }
-
-                        byte[] dtlsHandShakeData = new byte[handshakeDataLength];
-                        System.arraycopy(data, index, dtlsHandShakeData, 0, handshakeDataLength);
-                        index += handshakeDataLength;
-
-                        DtlsHandshake dtlsHandshake = new DtlsHandshake(dtlsHandshakeCommonBody.getHandshakeType(), dtlsHandShakeData);
+                        DtlsHandshake dtlsHandshake = new DtlsHandshake(handShakeData);
                         dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsHandshake);
                     }
 

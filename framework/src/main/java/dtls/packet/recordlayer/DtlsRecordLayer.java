@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import dtls.packet.handshake.DtlsEncryptedHandShake;
 import dtls.packet.handshake.DtlsHandshake;
 import dtls.packet.handshake.DtlsHandshakeFactory;
-import dtls.type.base.DtlsHandshakeCommonBody;
 
 public class DtlsRecordLayer {
 
@@ -44,25 +43,14 @@ public class DtlsRecordLayer {
             if (remainDataLength > 0) {
                 int length = dtlsRecordHeader.getLength();
                 if (length > 0) {
+                    byte[] handShakeData = new byte[length];
+                    System.arraycopy(data, index, handShakeData, 0, length);
+
                     int epoch = dtlsRecordHeader.getEpoch();
                     if (epoch != 0) { // Encrypted
-                        byte[] encryptedHandShakeData = new byte[length];
-                        System.arraycopy(data, index, encryptedHandShakeData, 0, length);
-                        index += length;
-                        dtlsHandshakeFactory = new DtlsEncryptedHandShake(encryptedHandShakeData);
+                        dtlsHandshakeFactory = new DtlsEncryptedHandShake(handShakeData);
                     } else { // Not encrypted
-                        byte[] dtlsHandShakeCommonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
-                        System.arraycopy(data, index, dtlsHandShakeCommonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
-                        index += DtlsHandshakeCommonBody.LENGTH;
-                        DtlsHandshakeCommonBody dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(dtlsHandShakeCommonBodyData);
-
-                        int handshakeDataLength = (int) dtlsHandshakeCommonBody.getLength();
-                        if (handshakeDataLength > 0) {
-                            byte[] dtlsHandShakeData = new byte[handshakeDataLength];
-                            System.arraycopy(data, index, dtlsHandShakeData, 0, handshakeDataLength);
-                            index += handshakeDataLength;
-                            dtlsHandshakeFactory = new DtlsHandshake(dtlsHandshakeCommonBody.getHandshakeType(), dtlsHandShakeData);
-                        }
+                        dtlsHandshakeFactory = new DtlsHandshake(handShakeData);
                     }
                 }
             }
@@ -83,7 +71,7 @@ public class DtlsRecordLayer {
         index += DtlsRecordHeader.LENGTH;
 
         byte[] dtlsHandshakeFactoryData = dtlsHandshakeFactory.getData();
-        if (dtlsHandshakeFactoryData.length > 0) {
+        if (dtlsHandshakeFactoryData != null && dtlsHandshakeFactoryData.length > 0) {
             System.arraycopy(dtlsHandshakeFactoryData, 0, data, index, dtlsHandshakeFactoryData.length);
         }
 

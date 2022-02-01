@@ -1,21 +1,14 @@
 package dtls.type;
 
 import dtls.type.base.DtlsFormat;
-import dtls.type.base.DtlsHandshakeCommonBody;
 
 public class DtlsHelloRequest extends DtlsFormat {
 
     ////////////////////////////////////////////////////////////
-    public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH;
-
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null;
+    public static final int LENGTH = 0;
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHelloRequest(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
-
     public DtlsHelloRequest() {}
 
     public DtlsHelloRequest(byte[] data) {
@@ -31,13 +24,6 @@ public class DtlsHelloRequest extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
-        return dtlsHandshakeCommonBody;
-    }
-
-    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
     ////////////////////////////////////////////////////////////
 
 }

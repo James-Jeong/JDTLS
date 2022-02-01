@@ -3,16 +3,14 @@ package dtls.type;
 import dtls.cipher.DtlsCipherSuite;
 import dtls.compression.DtlsCompressionMethodType;
 import dtls.type.base.DtlsFormat;
-import dtls.type.base.DtlsHandshakeCommonBody;
 import dtls.type.base.DtlsRandom;
 import util.module.ByteUtil;
 
 public class DtlsServerHello extends DtlsFormat {
 
     ////////////////////////////////////////////////////////////
-    public static final int LENGTH = DtlsHandshakeCommonBody.LENGTH + 70;
+    public static final int LENGTH = 70;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null; // 12 bytes
     transient private byte[] randomBytes = null; // 32 bytes (DtlsRandom.getRandom())
     private short sessionIdLength = 0; // 1 byte
     transient private byte[] sessionIdBytes = null; // 32 bytes
@@ -21,12 +19,10 @@ public class DtlsServerHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsServerHello(DtlsHandshakeCommonBody dtlsHandshakeCommonBody,
-                           byte[] randomBytes,
+    public DtlsServerHello(byte[] randomBytes,
                            short sessionIdLength, byte[] sessionIdBytes,
                            DtlsCipherSuite cipherSuite,
                            DtlsCompressionMethodType dtlsCompressionMethod) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
         this.randomBytes = randomBytes;
         this.sessionIdLength = sessionIdLength;
         this.sessionIdBytes = sessionIdBytes;
@@ -39,11 +35,6 @@ public class DtlsServerHello extends DtlsFormat {
     public DtlsServerHello(byte[] data) {
         if (data.length == LENGTH) {
             int index = 0;
-
-            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
-            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
-            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
-            index += commonBodyData.length;
 
             randomBytes = new byte[DtlsRandom.LENGTH];
             System.arraycopy(data, index, randomBytes, 0, DtlsRandom.LENGTH);
@@ -75,15 +66,11 @@ public class DtlsServerHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
-        if (dtlsHandshakeCommonBody == null || randomBytes == null || sessionIdBytes == null
+        if (randomBytes == null || sessionIdBytes == null
                 || cipherSuite == null || dtlsCompressionMethod == null) { return null; }
 
         int index = 0;
         byte[] data = new byte[LENGTH];
-
-        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-        index += DtlsHandshakeCommonBody.LENGTH;
 
         System.arraycopy(randomBytes, 0, data, index, randomBytes.length);
         index += randomBytes.length;
@@ -110,14 +97,6 @@ public class DtlsServerHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
-        return dtlsHandshakeCommonBody;
-    }
-
-    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
-
     public byte[] getRandomBytes() {
         return randomBytes;
     }

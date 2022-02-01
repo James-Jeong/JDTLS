@@ -2,23 +2,20 @@ package dtls.type;
 
 import dtls.packet.base.DtlsProtocolVersion;
 import dtls.type.base.DtlsFormat;
-import dtls.type.base.DtlsHandshakeCommonBody;
 import util.module.ByteUtil;
 
 public class DtlsHelloVerifyRequest extends DtlsFormat {
 
     ////////////////////////////////////////////////////////////
-    public static final int MIN_LENGTH = DtlsHandshakeCommonBody.LENGTH + 3;
+    public static final int MIN_LENGTH = 3;
 
-    private DtlsHandshakeCommonBody dtlsHandshakeCommonBody = null; // 12 bytes
     private DtlsProtocolVersion protocolVersion = null; // 2 bytes
     private short cookieLength = 0; // 1 byte
     transient private byte[] cookie = null; // cookieLength bytes
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHelloVerifyRequest(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, DtlsProtocolVersion protocolVersion, short cookieLength, byte[] cookie) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
+    public DtlsHelloVerifyRequest(DtlsProtocolVersion protocolVersion, short cookieLength, byte[] cookie) {
         this.protocolVersion = protocolVersion;
         this.cookieLength = cookieLength;
         this.cookie = cookie;
@@ -29,11 +26,6 @@ public class DtlsHelloVerifyRequest extends DtlsFormat {
     public DtlsHelloVerifyRequest(byte[] data) {
         if (data.length >= MIN_LENGTH) {
             int index = 0;
-
-            byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];
-            System.arraycopy(data, index, commonBodyData, 0, DtlsHandshakeCommonBody.LENGTH);
-            dtlsHandshakeCommonBody = new DtlsHandshakeCommonBody(commonBodyData);
-            index += commonBodyData.length;
 
             byte[] protocolVersionData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
             System.arraycopy(data, index, protocolVersionData, 0, ByteUtil.NUM_BYTES_IN_SHORT);
@@ -58,14 +50,13 @@ public class DtlsHelloVerifyRequest extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
-        if (dtlsHandshakeCommonBody == null || protocolVersion == null) { return null; }
+        if (protocolVersion == null) { return null; }
 
         int index = 0;
         byte[] data = new byte[MIN_LENGTH + cookieLength];
 
-        byte[] commonBodyData = dtlsHandshakeCommonBody.getData();
-        System.arraycopy(commonBodyData, 0, data, index, DtlsHandshakeCommonBody.LENGTH);
-        index += DtlsHandshakeCommonBody.LENGTH;
+        System.arraycopy(protocolVersion.getVersion(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
+        index += ByteUtil.NUM_BYTES_IN_SHORT;
 
         byte[] cookieLengthData = ByteUtil.shortToBytes(cookieLength, true);
         byte[] cookieLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
@@ -82,14 +73,6 @@ public class DtlsHelloVerifyRequest extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsHandshakeCommonBody getDtlsHandshakeCommonBody() {
-        return dtlsHandshakeCommonBody;
-    }
-
-    public void setDtlsHandshakeCommonBody(DtlsHandshakeCommonBody dtlsHandshakeCommonBody) {
-        this.dtlsHandshakeCommonBody = dtlsHandshakeCommonBody;
-    }
-
     public DtlsProtocolVersion getProtocolVersion() {
         return protocolVersion;
     }

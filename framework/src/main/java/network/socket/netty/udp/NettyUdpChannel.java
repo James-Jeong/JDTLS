@@ -116,7 +116,10 @@ public class NettyUdpChannel extends NettyChannel {
 
     @Override
     public void sendData(byte[] data, int dataLength) {
-        if (connectChannel == null || connectChannel.isActive()) { return; }
+        if (connectChannel == null || !connectChannel.isActive()) {
+            getBaseEnvironment().printMsg(DebugLevel.WARN, "Channel is not active. Fail to send the data. (length=%s)", dataLength);
+            return;
+        }
 
         ByteBuf buf = Unpooled.copiedBuffer(data);
         connectChannel.writeAndFlush(buf);
