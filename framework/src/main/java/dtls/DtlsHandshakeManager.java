@@ -71,7 +71,7 @@ public class DtlsHandshakeManager {
     
     ////////////////////////////////////////////////////////////
     // VARIABLES
-    public static DtlsHandshakeManager dtlsHandshakeManager = null;
+    private static DtlsHandshakeManager dtlsHandshakeManager = null;
 
     private final HashMap<String, DtlsUnit> dtlsUnitHashMap = new HashMap<>();
     private final ReentrantLock dtlsUnitHashMapLock = new ReentrantLock();

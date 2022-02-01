@@ -1,5 +1,10 @@
 package dtls;
 
+import JFSM.JFSM.src.main.java.com.fsm.StateManager;
+import JFSM.JFSM.src.main.java.com.fsm.module.StateHandler;
+import JFSM.JFSM.src.main.java.com.fsm.unit.StateUnit;
+import dtls.fsm.definition.DtlsEvent;
+import dtls.fsm.definition.DtlsState;
 import dtls.handler.DtlsPacketHandler;
 import dtls.packet.DtlsPacket;
 import dtls.packet.handshake.DtlsHandshake;
@@ -10,6 +15,7 @@ import dtls.type.DtlsHelloVerifyRequest;
 import dtls.type.base.DtlsFormat;
 import dtls.type.base.DtlsHandshakeCommonBody;
 import dtls.type.base.DtlsHandshakeType;
+import dtls.unit.DtlsUnit;
 import instance.BaseEnvironment;
 import instance.DebugLevel;
 import io.netty.channel.ChannelInitializer;
@@ -102,6 +108,18 @@ public class DtlsNetworkTest {
 
         ////////////////////////////////////////////////////////////
         // DTLS 통신
+        String dtlsKey = "1234";
+        DtlsHandshakeManager.getInstance().addDtlsUnit(dtlsKey);
+        DtlsUnit dtlsUnit = DtlsHandshakeManager.getInstance().getDtlsUnit(dtlsKey);
+        Assert.assertNotNull(dtlsUnit);
+
+        StateManager stateManager = dtlsUnit.getDtlsFsmManager().getStateManager();
+        StateHandler stateHandler = stateManager.getStateHandler(DtlsState.NAME);
+        StateUnit stateUnit = stateManager.getStateUnit(dtlsUnit.getDtlsStateUnitName());
+        ////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////
+        // DTLS 통신
         // netAddress1 : Client
         // netAddress2 : Server
 
@@ -129,6 +147,8 @@ public class DtlsNetworkTest {
         byte[] dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        stateHandler.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit);
         ///////////////////////////////
 
         ///////////////////////////////
