@@ -12,6 +12,8 @@ import dtls.packet.handshake.DtlsEncryptedHandShake;
 import dtls.packet.handshake.DtlsHandshake;
 import dtls.packet.recordlayer.DtlsRecordHeader;
 import dtls.packet.recordlayer.DtlsRecordLayer;
+import dtls.packet.recordlayer.message.DtlsApplicationData;
+import dtls.packet.recordlayer.message.DtlsChangeCipherSpec;
 import dtls.type.*;
 import dtls.type.base.DtlsFormat;
 import dtls.type.base.DtlsHandshakeCommonBody;
@@ -79,9 +81,15 @@ public class DtlsMessageTest {
         /////////////////////////////////////////////////////////
 
         /////////////////////////////////////////////////////////
-        // DtlsServerKeyExchange
-        DtlsClientKeyExchange dtlsClientKeyExchange = createDtlsClientKeyExchangeTest();
-        Assert.assertNotNull(dtlsClientKeyExchange);
+        // DtlsChangeCipherSpecMessage
+        DtlsChangeCipherSpec dtlsChangeCipherSpecMessage = createDtlsChangeCipherSpecTest();
+        Assert.assertNotNull(dtlsChangeCipherSpecMessage);
+        /////////////////////////////////////////////////////////
+
+        /////////////////////////////////////////////////////////
+        // DtlsApplicationData
+        DtlsApplicationData dtlsApplicationData = createDtlsApplicationData();
+        Assert.assertNotNull(dtlsApplicationData);
         /////////////////////////////////////////////////////////
 
         /////////////////////////////////////////////////////////
@@ -146,14 +154,14 @@ public class DtlsMessageTest {
                 0,
                 recordLength
         );
-        logger.debug("[DtlsTest][createDtlsRecordHeaderTest] DtlsRecordHeader: {}", dtlsRecordHeader);
+        logger.debug("[DtlsMessageTest][createDtlsRecordHeaderTest] DtlsRecordHeader: {}", dtlsRecordHeader);
 
         return dtlsRecordHeader;
     }
 
     public static DtlsPacket createDtlsPacketTest(List<DtlsRecordLayer> dtlsRecordLayerList) {
         DtlsPacket dtlsPacket = new DtlsPacket(dtlsRecordLayerList);
-        logger.debug("[DtlsTest][createDtlsPacketTest] DtlsPacket: {}", dtlsPacket);
+        logger.debug("[DtlsMessageTest][createDtlsPacketTest] DtlsPacket: {}", dtlsPacket);
 
         return dtlsPacket;
     }
@@ -163,23 +171,23 @@ public class DtlsMessageTest {
                 dtlsHandshakeCommonBody,
                 dtlsFormat
         );
-        logger.debug("[DtlsTest][createDtlsHandshakeByObjectTest] DtlsHandshake: {}", dtlsHandshake);
+        logger.debug("[DtlsMessageTest][createDtlsHandshakeByObjectTest] DtlsHandshake: {}", dtlsHandshake);
 
         return dtlsHandshake;
     }
 
     public static DtlsHandshake createDtlsHandshakeByByteDataTest(byte[] data) {
         DtlsHandshake dtlsHandshake = new DtlsHandshake(data);
-        logger.debug("[DtlsTest][createDtlsHandshakeByByteDataTest] DtlsHandshake: {}", dtlsHandshake);
+        logger.debug("[DtlsMessageTest][createDtlsHandshakeByByteDataTest] DtlsHandshake: {}", dtlsHandshake);
 
         return dtlsHandshake;
     }
 
     public static DtlsEncryptedHandShake createDtlsEncryptedHandshakeTest() {
-        byte[] encryptedMessage = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+        byte[] encryptedMessage = new byte[] { (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08 };
 
         DtlsEncryptedHandShake dtlsEncryptedHandShake = new DtlsEncryptedHandShake(encryptedMessage);
-        logger.debug("[DtlsTest][createDtlsEncryptedHandshakeTest] DtlsEncryptedHandShake: {}", dtlsEncryptedHandShake);
+        logger.debug("[DtlsMessageTest][createDtlsEncryptedHandshakeTest] DtlsEncryptedHandShake: {}", dtlsEncryptedHandShake);
 
         return dtlsEncryptedHandShake;
     }
@@ -195,17 +203,17 @@ public class DtlsMessageTest {
         dtlsCipherSuiteLists.add(new DtlsCipherSuite(DtlsCipherSuiteType.TLS_ECDHE_PSK_WITH_RC4_128_SHA));
 
         DtlsCipherSuiteList dtlsCipherSuiteList = new DtlsCipherSuiteList(dtlsCipherSuiteLists);
-        //logger.debug("[DtlsTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList: {}", dtlsCipherSuiteList);
+        //logger.debug("[DtlsMessageTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList: {}", dtlsCipherSuiteList);
 
         // ENCODING
         byte[] dtlsCipherSuiteListData = dtlsCipherSuiteList.getData();
         Assert.assertNotNull(dtlsCipherSuiteListData);
-        //logger.debug("[DtlsTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList byte data: {}", dtlsCipherSuiteListData);
-        //logger.debug("[DtlsTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList byte data: {}", ByteUtil.byteArrayToHex(dtlsCipherSuiteListData));
+        //logger.debug("[DtlsMessageTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList byte data: {}", dtlsCipherSuiteListData);
+        //logger.debug("[DtlsMessageTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList byte data: {}", ByteUtil.byteArrayToHex(dtlsCipherSuiteListData));
 
         // DECODING
         dtlsCipherSuiteList = new DtlsCipherSuiteList(dtlsCipherSuiteListData);
-        //logger.debug("[DtlsTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList: {}", dtlsCipherSuiteList);
+        //logger.debug("[DtlsMessageTest][createDtlsCipherSuiteListTest] DtlsCipherSuiteList: {}", dtlsCipherSuiteList);
 
         return dtlsCipherSuiteList;
     }
@@ -228,16 +236,16 @@ public class DtlsMessageTest {
                 dtlsCipherSuiteList.getTotalLength(), dtlsCipherSuiteList,
                 (short) 1, new DtlsCompressionMethodType(DtlsCompressionMethodType.TLS_COMPRESSION_METHOD_NULL)
         );
-        logger.debug("[DtlsTest][createDtlsClientHelloTest] DtlsClientHello: {}", dtlsClientHello);
+        logger.debug("[DtlsMessageTest][createDtlsClientHelloTest] DtlsClientHello: {}", dtlsClientHello);
 
         // ENCODING
         byte[] dtlsClientHelloData = dtlsClientHello.getData();
-        logger.debug("[DtlsTest][createDtlsClientHelloTest] DtlsClientHello byte data: {}", dtlsClientHelloData);
-        logger.debug("[DtlsTest][createDtlsClientHelloTest] DtlsClientHello byte data: {}", ByteUtil.byteArrayToHex(dtlsClientHelloData));
+        logger.debug("[DtlsMessageTest][createDtlsClientHelloTest] DtlsClientHello byte data: {}", dtlsClientHelloData);
+        logger.debug("[DtlsMessageTest][createDtlsClientHelloTest] DtlsClientHello byte data: {}", ByteUtil.byteArrayToHex(dtlsClientHelloData));
 
         // DECODING
         dtlsClientHello = new DtlsClientHello(dtlsClientHelloData);
-        logger.debug("[DtlsTest][createDtlsClientHelloTest] DtlsClientHello: {}", dtlsClientHello);
+        logger.debug("[DtlsMessageTest][createDtlsClientHelloTest] DtlsClientHello: {}", dtlsClientHello);
 
         return dtlsClientHello;
     }
@@ -247,16 +255,16 @@ public class DtlsMessageTest {
                 new DtlsProtocolVersion(DtlsProtocolVersion.DTLS_1_0),
                 (short) 0, null
         );
-        logger.debug("[DtlsTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest: {}", dtlsHelloVerifyRequest);
+        logger.debug("[DtlsMessageTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest: {}", dtlsHelloVerifyRequest);
 
         // ENCODING
         byte[] dtlsHelloVerifyRequestData = dtlsHelloVerifyRequest.getData();
-        logger.debug("[DtlsTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest byte data: {}", dtlsHelloVerifyRequestData);
-        logger.debug("[DtlsTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest byte data: {}", ByteUtil.byteArrayToHex(dtlsHelloVerifyRequestData));
+        logger.debug("[DtlsMessageTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest byte data: {}", dtlsHelloVerifyRequestData);
+        logger.debug("[DtlsMessageTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest byte data: {}", ByteUtil.byteArrayToHex(dtlsHelloVerifyRequestData));
 
         // DECODING
         dtlsHelloVerifyRequest = new DtlsHelloVerifyRequest(dtlsHelloVerifyRequestData);
-        logger.debug("[DtlsTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest: {}", dtlsHelloVerifyRequestData);
+        logger.debug("[DtlsMessageTest][createDtlsHelloVerifyRequest] DtlsHelloVerifyRequest: {}", dtlsHelloVerifyRequestData);
 
         return dtlsHelloVerifyRequest;
     }
@@ -264,21 +272,21 @@ public class DtlsMessageTest {
     public static DtlsServerHello createDtlsServerHelloTest() {
         DtlsServerHello dtlsServerHello = new DtlsServerHello(
                 DtlsRandom.getRandom(),
-                (short) 8, new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 },
+                (short) 8, new byte[] { (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08 },
                 new DtlsCipherSuite(DtlsCipherSuiteType.TLS_RSA_WITH_RC4_128_MD5),
                 new DtlsCompressionMethodType(DtlsCompressionMethodType.TLS_COMPRESSION_METHOD_NULL)
         );
 
-        logger.debug("[DtlsTest][createDtlsServerHelloTest] DtlsServerHello: {}", dtlsServerHello);
+        logger.debug("[DtlsMessageTest][createDtlsServerHelloTest] DtlsServerHello: {}", dtlsServerHello);
 
         // ENCODING
         byte[] dtlsHelloVedtlsServerHelloData = dtlsServerHello.getData();
-        logger.debug("[DtlsTest][createDtlsServerHelloTest] DtlsServerHello byte data: {}", dtlsHelloVedtlsServerHelloData);
-        logger.debug("[DtlsTest][createDtlsServerHelloTest] DtlsServerHello byte data: {}", ByteUtil.byteArrayToHex(dtlsHelloVedtlsServerHelloData));
+        logger.debug("[DtlsMessageTest][createDtlsServerHelloTest] DtlsServerHello byte data: {}", dtlsHelloVedtlsServerHelloData);
+        logger.debug("[DtlsMessageTest][createDtlsServerHelloTest] DtlsServerHello byte data: {}", ByteUtil.byteArrayToHex(dtlsHelloVedtlsServerHelloData));
 
         // DECODING
         dtlsServerHello = new DtlsServerHello(dtlsHelloVedtlsServerHelloData);
-        logger.debug("[DtlsTest][createDtlsServerHelloTest] DtlsServerHello: {}", dtlsHelloVedtlsServerHelloData);
+        logger.debug("[DtlsMessageTest][createDtlsServerHelloTest] DtlsServerHello: {}", dtlsHelloVedtlsServerHelloData);
 
         return dtlsServerHello;
     }
@@ -294,9 +302,9 @@ public class DtlsMessageTest {
             certificateData = certificate.getEncoded();
 
             PublicKey publicKey = certificate.getPublicKey();
-            logger.debug("[DtlsTest][createDtlsCertificateTest] Public key: [{}], \ncertificate.getEncoded(): {}", publicKey, certificateData);
+            logger.debug("[DtlsMessageTest][createDtlsCertificateTest] Public key: [{}], \ncertificate.getEncoded(): {}", publicKey, certificateData);
         } catch (Exception e) {
-            logger.debug("[DtlsTest][createDtlsCertificateTest] Certificate Exception", e);
+            logger.debug("[DtlsMessageTest][createDtlsCertificateTest] Certificate Exception", e);
             return null;
         }
 
@@ -311,65 +319,104 @@ public class DtlsMessageTest {
                 certificates
         );
 
-        logger.debug("[DtlsTest][createDtlsCertificateTest] DtlsCertificate: {}", dtlsCertificate);
+        logger.debug("[DtlsMessageTest][createDtlsCertificateTest] DtlsCertificate: {}", dtlsCertificate);
 
         // ENCODING
         byte[] dtlsCertificateData = dtlsCertificate.getData();
-        logger.debug("[DtlsTest][createDtlsCertificateTest] DtlsCertificate byte data: {}", dtlsCertificateData);
-        logger.debug("[DtlsTest][createDtlsCertificateTest] DtlsCertificate byte data: {}", ByteUtil.byteArrayToHex(dtlsCertificateData));
+        logger.debug("[DtlsMessageTest][createDtlsCertificateTest] DtlsCertificate byte data: {}", dtlsCertificateData);
+        logger.debug("[DtlsMessageTest][createDtlsCertificateTest] DtlsCertificate byte data: {}", ByteUtil.byteArrayToHex(dtlsCertificateData));
 
         // DECODING
         dtlsCertificate = new DtlsCertificate(dtlsCertificateData);
-        logger.debug("[DtlsTest][createDtlsCertificateTest] DtlsCertificate: {}", dtlsCertificate);
+        logger.debug("[DtlsMessageTest][createDtlsCertificateTest] DtlsCertificate: {}", dtlsCertificate);
 
         return dtlsCertificate;
     }
 
     public static DtlsServerKeyExchange createDtlsServerKeyExchangeTest() {
-        byte[] encryptedPreMasterSecretData = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+        byte[] encryptedPreMasterSecretData = new byte[] { (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08 };
 
         DtlsServerKeyExchange dtlsServerKeyExchange = new DtlsServerKeyExchange(encryptedPreMasterSecretData);
-        logger.debug("[DtlsTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange: {}", dtlsServerKeyExchange);
+        logger.debug("[DtlsMessageTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange: {}", dtlsServerKeyExchange);
 
         // ENCODING
         byte[] dtlsServerKeyExchangeData = dtlsServerKeyExchange.getData();
-        logger.debug("[DtlsTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange byte data: {}", dtlsServerKeyExchangeData);
-        logger.debug("[DtlsTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange byte data: {}", ByteUtil.byteArrayToHex(dtlsServerKeyExchangeData));
+        logger.debug("[DtlsMessageTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange byte data: {}", dtlsServerKeyExchangeData);
+        logger.debug("[DtlsMessageTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange byte data: {}", ByteUtil.byteArrayToHex(dtlsServerKeyExchangeData));
 
         // DECODING
         dtlsServerKeyExchange = new DtlsServerKeyExchange(dtlsServerKeyExchangeData);
-        logger.debug("[DtlsTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange: {}", dtlsServerKeyExchange);
+        logger.debug("[DtlsMessageTest][createDtlsServerKeyExchangeTest] DtlsServerKeyExchange: {}", dtlsServerKeyExchange);
 
         return dtlsServerKeyExchange;
     }
 
     public static DtlsServerHelloDone createDtlsServerHelloDoneTest() {
         DtlsServerHelloDone dtlsServerHelloDone = new DtlsServerHelloDone();
-        logger.debug("[DtlsTest][createDtlsServerHelloDoneTest] DtlsServerHelloDone: {}", dtlsServerHelloDone);
+        logger.debug("[DtlsMessageTest][createDtlsServerHelloDoneTest] DtlsServerHelloDone: {}", dtlsServerHelloDone);
         return dtlsServerHelloDone;
     }
 
     public static DtlsClientKeyExchange createDtlsClientKeyExchangeTest() {
-        byte[] encryptedPreMasterSecretData = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+        byte[] encryptedPreMasterSecretData = new byte[] { (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08 };
 
         DtlsClientKeyExchange dtlsClientKeyExchange = new DtlsClientKeyExchange(encryptedPreMasterSecretData);
-        logger.debug("[DtlsTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange: {}", dtlsClientKeyExchange);
+        logger.debug("[DtlsMessageTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange: {}", dtlsClientKeyExchange);
 
         // ENCODING
         byte[] dtlsClientKeyExchangeData = dtlsClientKeyExchange.getData();
-        logger.debug("[DtlsTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange byte data: {}", dtlsClientKeyExchangeData);
-        logger.debug("[DtlsTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange byte data: {}", ByteUtil.byteArrayToHex(dtlsClientKeyExchangeData));
+        logger.debug("[DtlsMessageTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange byte data: {}", dtlsClientKeyExchangeData);
+        logger.debug("[DtlsMessageTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange byte data: {}", ByteUtil.byteArrayToHex(dtlsClientKeyExchangeData));
 
         // DECODING
         dtlsClientKeyExchange = new DtlsClientKeyExchange(dtlsClientKeyExchangeData);
-        logger.debug("[DtlsTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange: {}", dtlsClientKeyExchange);
+        logger.debug("[DtlsMessageTest][createDtlsClientKeyExchangeTest] DtlsClientKeyExchange: {}", dtlsClientKeyExchange);
 
         return dtlsClientKeyExchange;
     }
 
+    public static DtlsChangeCipherSpec createDtlsChangeCipherSpecTest() {
+        DtlsChangeCipherSpec dtlsChangeCipherSpec = new DtlsChangeCipherSpec();
+        logger.debug("[DtlsMessageTest][createDtlsChangeCipherSpecMessageTest] DtlsChangeCipherSpecMessage: {}", dtlsChangeCipherSpec);
+        return dtlsChangeCipherSpec;
+    }
+
+    public static DtlsApplicationData createDtlsApplicationData() {
+        byte[] applicationData = {
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x08, (byte) 0x00, (byte) 0x45, (byte) 0x00,
+                (byte) 0x00, (byte) 0x59, (byte) 0xb8, (byte) 0xfc,
+                (byte) 0x40, (byte) 0x00, (byte) 0x40, (byte) 0x11,
+                (byte) 0x83, (byte) 0x95, (byte) 0x7f, (byte) 0x00,
+                (byte) 0x00, (byte) 0x01, (byte) 0x7f, (byte) 0x00,
+                (byte) 0x00, (byte) 0x01, (byte) 0x81, (byte) 0xa8,
+                (byte) 0x11, (byte) 0x51, (byte) 0x00, (byte) 0x45,
+                (byte) 0xfe, (byte) 0x58, (byte) 0x17, (byte) 0x01,
+                (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x00,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x01, (byte) 0x00, (byte) 0x30, (byte) 0xbc,
+                (byte) 0x8b, (byte) 0x22, (byte) 0x8b, (byte) 0x92,
+                (byte) 0x37, (byte) 0xdf, (byte) 0x40, (byte) 0xe4,
+                (byte) 0xe2, (byte) 0xce, (byte) 0x8d, (byte) 0xce,
+                (byte) 0x8f, (byte) 0x33, (byte) 0x4b, (byte) 0x90,
+                (byte) 0xea, (byte) 0x4b, (byte) 0x33, (byte) 0xc5,
+                (byte) 0xcb, (byte) 0x9a, (byte) 0x1f, (byte) 0x84,
+                (byte) 0x59, (byte) 0x6f, (byte) 0x9b, (byte) 0x06,
+                (byte) 0x79, (byte) 0x9e, (byte) 0x34, (byte) 0x86,
+                (byte) 0x07, (byte) 0xdb, (byte) 0x81, (byte) 0x9e,
+                (byte) 0xd7, (byte) 0xc8, (byte) 0x7e, (byte) 0x15,
+                (byte) 0x4d, (byte) 0x34, (byte) 0x24, (byte) 0xc7,
+                (byte) 0x89, (byte) 0xc1, (byte) 0x66};
+        DtlsApplicationData dtlsApplicationData = new DtlsApplicationData(applicationData);
+        logger.debug("[DtlsMessageTest][createDtlsApplicationData] DtlsApplicationData: {}", dtlsApplicationData);
+        return dtlsApplicationData;
+    }
+
     public static DtlsFinished createDtlsFinishedTest() {
         DtlsFinished dtlsFinished = new DtlsFinished();
-        logger.debug("[DtlsTest][createDtlsFinishedTest] DtlsFinished: {}", dtlsFinished);
+        logger.debug("[DtlsMessageTest][createDtlsFinishedTest] DtlsFinished: {}", dtlsFinished);
         return dtlsFinished;
     }
 

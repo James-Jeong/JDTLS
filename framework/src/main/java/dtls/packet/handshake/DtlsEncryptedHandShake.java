@@ -2,8 +2,9 @@ package dtls.packet.handshake;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dtls.packet.base.DtlsRecordFactory;
 
-public class DtlsEncryptedHandShake implements DtlsHandshakeFactory {
+public class DtlsEncryptedHandShake implements DtlsRecordFactory {
 
     ////////////////////////////////////////////////////////////
     transient private byte[] encryptedMessage = null;

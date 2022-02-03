@@ -2,11 +2,15 @@ package dtls.packet.recordlayer.message;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dtls.packet.base.DtlsRecordFactory;
 
-public class DtlsApplicationData {
+public class DtlsApplicationData implements DtlsRecordFactory {
 
+    ////////////////////////////////////////////////////////////
     private byte[] encryptedApplicationData;
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public DtlsApplicationData() {}
 
     public DtlsApplicationData(byte[] data) {
@@ -15,7 +19,10 @@ public class DtlsApplicationData {
             System.arraycopy(data, 0, encryptedApplicationData, 0, data.length);
         }
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
+    @Override
     public byte[] getData() {
         if (encryptedApplicationData == null) { return null; }
 
@@ -24,7 +31,9 @@ public class DtlsApplicationData {
 
         return data;
     }
+    ////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////
     public byte[] getEncryptedApplicationData() {
         return encryptedApplicationData;
     }
@@ -38,5 +47,6 @@ public class DtlsApplicationData {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+    ////////////////////////////////////////////////////////////
 
 }

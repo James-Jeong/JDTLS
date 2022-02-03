@@ -4,19 +4,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dtls.packet.handshake.DtlsEncryptedHandShake;
 import dtls.packet.handshake.DtlsHandshake;
-import dtls.packet.handshake.DtlsHandshakeFactory;
+import dtls.packet.base.DtlsRecordFactory;
 
 public class DtlsRecordLayer {
 
     ////////////////////////////////////////////////////////////
     private DtlsRecordHeader dtlsRecordHeader = null;
-    private DtlsHandshakeFactory dtlsHandshakeFactory = null;
+    private DtlsRecordFactory dtlsHandshakeFactory = null;
 
     private int length = 0;
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsRecordLayer(DtlsRecordHeader recordHeader, DtlsHandshakeFactory dtlsHandshakeFactory) {
+    public DtlsRecordLayer(DtlsRecordHeader recordHeader, DtlsRecordFactory dtlsHandshakeFactory) {
         this.dtlsRecordHeader = recordHeader;
         this.dtlsHandshakeFactory = dtlsHandshakeFactory;
 
@@ -88,11 +88,11 @@ public class DtlsRecordLayer {
         this.dtlsRecordHeader = dtlsRecordHeader;
     }
 
-    public DtlsHandshakeFactory getDtlsHandshakeFactory() {
+    public DtlsRecordFactory getDtlsHandshakeFactory() {
         return dtlsHandshakeFactory;
     }
 
-    public void setDtlsHandshakeFactory(DtlsHandshakeFactory dtlsHandshakeFactory) {
+    public void setDtlsHandshakeFactory(DtlsRecordFactory dtlsHandshakeFactory) {
         this.dtlsHandshakeFactory = dtlsHandshakeFactory;
     }
 

@@ -7,11 +7,12 @@ import dtls.fsm.definition.DtlsEvent;
 import dtls.fsm.definition.DtlsState;
 import dtls.handler.DtlsPacketHandler;
 import dtls.packet.DtlsPacket;
+import dtls.packet.base.DtlsRecordFactory;
 import dtls.packet.handshake.DtlsHandshake;
 import dtls.packet.recordlayer.DtlsRecordHeader;
 import dtls.packet.recordlayer.DtlsRecordLayer;
-import dtls.type.DtlsClientHello;
-import dtls.type.DtlsHelloVerifyRequest;
+import dtls.packet.recordlayer.message.DtlsChangeCipherSpec;
+import dtls.type.*;
 import dtls.type.base.DtlsFormat;
 import dtls.type.base.DtlsHandshakeCommonBody;
 import dtls.type.base.DtlsHandshakeType;
@@ -107,15 +108,27 @@ public class DtlsNetworkTest {
         ////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////
-        // DTLS 통신
-        String dtlsKey = "1234";
-        DtlsHandshakeManager.getInstance().addDtlsUnit(dtlsKey);
-        DtlsUnit dtlsUnit = DtlsHandshakeManager.getInstance().getDtlsUnit(dtlsKey);
-        Assert.assertNotNull(dtlsUnit);
+        // DTLS UNIT 생성 (Client: 1, Server: 2)
 
-        StateManager stateManager = dtlsUnit.getDtlsFsmManager().getStateManager();
-        StateHandler stateHandler = stateManager.getStateHandler(DtlsState.NAME);
-        StateUnit stateUnit = stateManager.getStateUnit(dtlsUnit.getDtlsStateUnitName());
+        // Client dtls unit
+        String dtls1Key = "DTLS_1";
+        DtlsHandshakeManager.getInstance().addDtlsUnit(dtls1Key);
+        DtlsUnit dtlsUnit1 = DtlsHandshakeManager.getInstance().getDtlsUnit(dtls1Key);
+        Assert.assertNotNull(dtlsUnit1);
+
+        StateManager stateManager1 = dtlsUnit1.getDtlsFsmManager().getStateManager();
+        StateHandler stateHandler1 = stateManager1.getStateHandler(DtlsState.NAME);
+        StateUnit stateUnit1 = stateManager1.getStateUnit(dtlsUnit1.getDtlsStateUnitName());
+
+        // Server dtls unit
+        String dtls2Key = "DTLS_2";
+        DtlsHandshakeManager.getInstance().addDtlsUnit(dtls2Key);
+        DtlsUnit dtlsUnit2 = DtlsHandshakeManager.getInstance().getDtlsUnit(dtls2Key);
+        Assert.assertNotNull(dtlsUnit2);
+
+        StateManager stateManager2 = dtlsUnit2.getDtlsFsmManager().getStateManager();
+        StateHandler stateHandler2 = stateManager2.getStateHandler(DtlsState.NAME);
+        StateUnit stateUnit2 = stateManager2.getStateUnit(dtlsUnit2.getDtlsStateUnitName());
         ////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////
@@ -142,13 +155,19 @@ public class DtlsNetworkTest {
                 new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_CLIENT_HELLO),
                 dtlsClientHello.getData().length
         );
-        DtlsPacket dtlsPacket = makeDtlsPacket(dtlsClientHelloHandshakeCommonBody, dtlsClientHello);
-
+        DtlsHandshake dtlsHandshake = makeDtlsHandshake(dtlsClientHelloHandshakeCommonBody, dtlsClientHello);
+        DtlsPacket dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
         byte[] dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
 
-        stateHandler.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit);
+        /**
+         * [DTLS_FLIGHT_1]
+         * DTLS_UNIT_1: PREPARING > SENDING > WAITING
+         * >> Waiting for HelloVerifyRequest from server
+         */
+        stateHandler1.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit1);
+        stateHandler1.fire(DtlsEvent.SEND_FLIGHT_2.name(), stateUnit1);
         ///////////////////////////////
 
         ///////////////////////////////
@@ -158,11 +177,266 @@ public class DtlsNetworkTest {
                 new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_HELLO_VERIFY_REQUEST),
                 dtlsHelloVerifyRequest.getData().length
         );
-        dtlsPacket = makeDtlsPacket(dtlsHelloVerifyRequestHandshakeCommonBody, dtlsHelloVerifyRequest);
-
+        dtlsHandshake = makeDtlsHandshake(dtlsHelloVerifyRequestHandshakeCommonBody, dtlsHelloVerifyRequest);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_2]
+         * DTLS_UNIT_2: PREPARING > SENDING > WAITING
+         * >> Waiting for ClientHello from client
+         * DTLS_UNIT_1: If timer is not expired, WAITING > PREPARING
+         *              If timer is expired, WAITING > SENDING
+         */
+        stateHandler2.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit2);
+        stateHandler2.fire(DtlsEvent.SEND_FLIGHT_2.name(), stateUnit2);
+
+        // MessageHandler 에서 직접 상태 천이 필요 > Timer 삭제 여부 반영 > 지금은 테스트 중이니까 여기서 천이
+        stateHandler1.fire(DtlsEvent.RECEIVE_NEXT_FLIGHT.name(), stateUnit1);
+        //stateHandler1.fire(DtlsEvent.TIMER_EXPIRES.name(), stateUnit1);
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 3) SEND CLIENT HELLO (Client > Server)
+        dtlsClientHello = DtlsMessageTest.createDtlsClientHelloTest();
+        dtlsClientHelloHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_CLIENT_HELLO),
+                dtlsClientHello.getData().length
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsClientHelloHandshakeCommonBody, dtlsClientHello);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_3]
+         * DTLS_UNIT_1: PREPARING > SENDING > WAITING
+         * >> Waiting for DTLS_FLIGHT_4
+         * DTLS_UNIT_2: WAITING > PREPARING
+         */
+        stateHandler1.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit1);
+        stateHandler1.fire(DtlsEvent.SEND_FLIGHT_2.name(), stateUnit1);
+
+        stateHandler2.fire(DtlsEvent.RECEIVE_NEXT_FLIGHT.name(), stateUnit2);
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 4) SEND SERVER HELLO (Server > Client)
+        DtlsServerHello dtlsServerHello = DtlsMessageTest.createDtlsServerHelloTest();
+        DtlsHandshakeCommonBody dtlsServerHelloHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_SERVER_HELLO),
+                dtlsServerHello.getData().length
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsServerHelloHandshakeCommonBody, dtlsServerHello);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_4]
+         * DTLS_UNIT_2: PREPARING > SENDING > WAITING
+         * >> Waiting for DTLS_FLIGHT_5
+         * DTLS_UNIT_1: WAITING > PREPARING
+         */
+        stateHandler2.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit2);
+        stateHandler2.fire(DtlsEvent.SEND_FLIGHT_2.name(), stateUnit2);
+
+        stateHandler1.fire(DtlsEvent.RECEIVE_NEXT_FLIGHT.name(), stateUnit1);
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 5) SEND CERTIFICATE (optional) (Server > Client)
+        DtlsCertificate dtlsCertificate = DtlsMessageTest.createDtlsCertificateTest();
+        int certificateDataLength = 0;
+        if (dtlsCertificate != null) {
+            certificateDataLength = dtlsCertificate.getData().length;
+        }
+        DtlsHandshakeCommonBody dtlsCertificateHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_CERTIFICATE),
+                certificateDataLength
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsCertificateHandshakeCommonBody, dtlsCertificate);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_4]
+         */
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 6) SEND SERVER KEY EXCHANGE (optional) (Server > Client)
+        DtlsServerKeyExchange dtlsServerKeyExchange = DtlsMessageTest.createDtlsServerKeyExchangeTest();
+        DtlsHandshakeCommonBody dtlsServerKeyExchangeHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_SERVER_KEY_EXCHANGE),
+                dtlsServerKeyExchange.getData().length
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsServerKeyExchangeHandshakeCommonBody, dtlsServerKeyExchange);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_4]
+         */
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 7) SEND CERTIFICATE REQUEST (optional) (Server > Client)
+        // SKIP
+
+        /**
+         * [DTLS_FLIGHT_4]
+         */
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 8) SEND SERVER HELLO DONE (Server > Client)
+        DtlsServerHelloDone dtlsServerHelloDone = DtlsMessageTest.createDtlsServerHelloDoneTest();
+        DtlsHandshakeCommonBody dtlsServerHelloDoneExchangeHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_SERVER_HELLO_DONE),
+                0
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsServerHelloDoneExchangeHandshakeCommonBody, dtlsServerHelloDone);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_4]
+         */
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 9) SEND CERTIFICATE (optional) (Client > Server)
+        dtlsCertificate = DtlsMessageTest.createDtlsCertificateTest();
+        certificateDataLength = 0;
+        if (dtlsCertificate != null) {
+            certificateDataLength = dtlsCertificate.getData().length;
+        }
+        dtlsCertificateHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_CERTIFICATE),
+                certificateDataLength
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsCertificateHandshakeCommonBody, dtlsCertificate);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_5]
+         * DTLS_UNIT_1: PREPARING > SENDING > WAITING
+         * >> Waiting for DTLS_FLIGHT_6
+         * DTLS_UNIT_2: WAITING > PREPARING
+         */
+        stateHandler1.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit1);
+        stateHandler1.fire(DtlsEvent.SEND_FLIGHT_2.name(), stateUnit1);
+
+        stateHandler2.fire(DtlsEvent.RECEIVE_NEXT_FLIGHT.name(), stateUnit2);
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 10) SEND CLIENT KEY EXCHANGE (Client > Server)
+        DtlsClientKeyExchange dtlsClientKeyExchange = DtlsMessageTest.createDtlsClientKeyExchangeTest();
+        DtlsHandshakeCommonBody dtlsClientKeyExchangeHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_CLIENT_KEY_EXCHANGE),
+                dtlsClientKeyExchange.getData().length
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsClientKeyExchangeHandshakeCommonBody, dtlsClientKeyExchange);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_5]
+         */
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 11) SEND CLIENT KEY EXCHANGE (optional) (Client > Server)
+        // SKIP
+
+        /**
+         * [DTLS_FLIGHT_5]
+         */
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 12) SEND CHANGE CIPHER SPEC (Client > Server)
+        DtlsChangeCipherSpec dtlsChangeCipherSpecMessage = DtlsMessageTest.createDtlsChangeCipherSpecTest();
+        dtlsPacket = makeSingleDtlsPacket(dtlsChangeCipherSpecMessage);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_5]
+         */
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 13) SEND FINISHED (Client > Server)
+        DtlsFinished dtlsFinished = DtlsMessageTest.createDtlsFinishedTest();
+        DtlsHandshakeCommonBody dtlsFinishedHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_FINISHED),
+                0
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsFinishedHandshakeCommonBody, dtlsFinished);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_5]
+         * DTLS_UNIT_1: WAITING > FINISHED
+         */
+        stateHandler1.fire(DtlsEvent.RECEIVE_LAST_FLIGHT.name(), stateUnit1);
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 14) SEND CHANGE CIPHER SPEC (Server > Client)
+        dtlsChangeCipherSpecMessage = DtlsMessageTest.createDtlsChangeCipherSpecTest();
+        dtlsPacket = makeSingleDtlsPacket(dtlsChangeCipherSpecMessage);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_6]
+         * DTLS_UNIT_2: PREPARING > SENDING
+         */
+        stateHandler2.fire(DtlsEvent.BUFFER_NEXT_FLIGHT.name(), stateUnit2);
+        ///////////////////////////////
+
+        ///////////////////////////////
+        // 14) SEND FINISHED (Server > Client)
+        dtlsFinished = DtlsMessageTest.createDtlsFinishedTest();
+        dtlsFinishedHandshakeCommonBody = DtlsMessageTest.createDtlsCommonBodyTest(
+                new DtlsHandshakeType(DtlsHandshakeType.TLS_TYPE_FINISHED),
+                0
+        );
+        dtlsHandshake = makeDtlsHandshake(dtlsFinishedHandshakeCommonBody, dtlsFinished);
+        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacketData = dtlsPacket.getData();
+        Assert.assertNotNull(dtlsPacketData);
+        nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
+
+        /**
+         * [DTLS_FLIGHT_6]
+         * DTLS_UNIT_2: SENDING > FINISHED
+         */
+        stateHandler2.fire(DtlsEvent.SEND_FLIGHT_1.name(), stateUnit2);
         ///////////////////////////////
 
         ////////////////////////////////////////////////////////////
@@ -186,12 +460,35 @@ public class DtlsNetworkTest {
         ////////////////////////////////////////////////////////////
     }
 
-    public static DtlsPacket makeDtlsPacket(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, DtlsFormat dtlsFormat) {
-        DtlsHandshake dtlsHandshake = DtlsMessageTest.createDtlsHandshakeByObjectTest(dtlsHandshakeCommonBody, dtlsFormat);
-        byte[] dtlsHandshakeData = dtlsHandshake.getData();
+    public static DtlsHandshake makeDtlsHandshake(DtlsHandshakeCommonBody dtlsHandshakeCommonBody, DtlsFormat dtlsFormat) {
+        return DtlsMessageTest.createDtlsHandshakeByObjectTest(dtlsHandshakeCommonBody, dtlsFormat);
+    }
+
+    public static DtlsPacket makeMultiDtlsPacket(List<DtlsRecordFactory> dtlsRecordFactoryList) {
+        if (dtlsRecordFactoryList == null || dtlsRecordFactoryList.isEmpty()) { return null; }
+
+        List<DtlsRecordLayer> dtlsRecordLayerList = new ArrayList<>();
+        for (DtlsRecordFactory dtlsRecordFactory : dtlsRecordFactoryList) {
+            if (dtlsRecordFactory == null) { continue; }
+
+            byte[] dtlsRecordFactoryData = dtlsRecordFactory.getData();
+            if (dtlsRecordFactoryData == null) { continue; }
+
+            DtlsRecordHeader dtlsRecordHeader = DtlsMessageTest.createDtlsRecordHeaderTest(dtlsRecordFactoryData.length);
+            DtlsRecordLayer dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsRecordFactory);
+            dtlsRecordLayerList.add(dtlsRecordLayer);
+        }
+        return DtlsMessageTest.createDtlsPacketTest(dtlsRecordLayerList);
+    }
+
+    public static DtlsPacket makeSingleDtlsPacket(DtlsRecordFactory dtlsRecordFactory) {
+        if (dtlsRecordFactory == null) { return null; }
+
+        byte[] dtlsHandshakeData = dtlsRecordFactory.getData();
+
         DtlsRecordHeader dtlsRecordHeader = DtlsMessageTest.createDtlsRecordHeaderTest(dtlsHandshakeData.length);
         List<DtlsRecordLayer> dtlsRecordLayerList = new ArrayList<>();
-        DtlsRecordLayer dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsHandshake);
+        DtlsRecordLayer dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsRecordFactory);
         dtlsRecordLayerList.add(dtlsRecordLayer);
         return DtlsMessageTest.createDtlsPacketTest(dtlsRecordLayerList);
     }

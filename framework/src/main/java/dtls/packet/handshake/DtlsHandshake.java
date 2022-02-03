@@ -2,6 +2,7 @@ package dtls.packet.handshake;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dtls.packet.base.DtlsRecordFactory;
 import dtls.type.*;
 import dtls.type.base.DtlsFormat;
 import dtls.type.base.DtlsHandshakeCommonBody;
@@ -9,7 +10,7 @@ import dtls.type.base.DtlsHandshakeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DtlsHandshake implements DtlsHandshakeFactory {
+public class DtlsHandshake implements DtlsRecordFactory {
 
     ////////////////////////////////////////////////////////////
     private static final Logger logger = LoggerFactory.getLogger(DtlsHandshake.class);
