@@ -36,10 +36,8 @@ public class NetworkTest {
         // SocketManager 생성
         SocketManager socketManager = new SocketManager(
                 baseEnvironment,
-                false,
-                10,
-                500000,
-                500000
+                false, false,
+                10, 500000, 500000
         );
 
         // NetAddress 생성
@@ -106,10 +104,7 @@ public class NetworkTest {
         // SocketManager 생성
         SocketManager socketManager = new SocketManager(
                 baseEnvironment,
-                false,
-                10,
-                0,
-                500000
+                false, true, 10, 0, 500000
         );
 
         // NetAddress 생성

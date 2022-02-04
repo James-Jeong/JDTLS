@@ -61,10 +61,8 @@ public class DtlsNetworkTest {
         // SocketManager 생성
         SocketManager socketManager = new SocketManager(
                 baseEnvironment,
-                false,
-                10,
-                500000,
-                500000
+                false, false,
+                10, 500000, 500000
         );
         ////////////////////////////////////////////////////////////
 
