@@ -116,6 +116,7 @@ public class DtlsHandshakeManager {
             ////////////////////////////
 
             dtlsUnitHashMap.putIfAbsent(key, dtlsUnit);
+            logger.warn("Success to add a new dtls unit. (key={})", key);
         } catch (Exception e) {
             logger.warn("DtlsHandshakeManager.addDtlsUnit.Exception", e);
         } finally {

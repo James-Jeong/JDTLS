@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import util.module.ByteUtil;
 
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -130,7 +131,7 @@ public class DtlsMessageTest {
 
         // 1) DtlsRecordHeader
         byte[] dtlsHandshakeData = dtlsHandshake.getData();
-        DtlsRecordHeader dtlsRecordHeader = createDtlsRecordHeaderTest(dtlsHandshakeData.length);
+        DtlsRecordHeader dtlsRecordHeader = createDtlsRecordHeaderTest(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshakeData.length);
 
         // 2) DtlsHandshakeFactory
         // Already exists
@@ -146,9 +147,9 @@ public class DtlsMessageTest {
         /////////////////////////////////////////////////////////
     }
 
-    public static DtlsRecordHeader createDtlsRecordHeaderTest(int recordLength) {
+    public static DtlsRecordHeader createDtlsRecordHeaderTest(int dtlsContentType, int recordLength) {
         DtlsRecordHeader dtlsRecordHeader = new DtlsRecordHeader(
-                new DtlsContentType(DtlsContentType.TLS_TYPE_HANDSHAKE),
+                new DtlsContentType(dtlsContentType),
                 new DtlsProtocolVersion(DtlsProtocolVersion.DTLS_1_0),
                 0,
                 0,
@@ -231,7 +232,7 @@ public class DtlsMessageTest {
         DtlsClientHello dtlsClientHello = new DtlsClientHello(
                 new DtlsProtocolVersion(DtlsProtocolVersion.DTLS_1_0),
                 DtlsRandom.getRandom(),
-                (short) 8,
+                (short) 8, "12345678".getBytes(StandardCharsets.UTF_8),
                 (short) 0, null,
                 dtlsCipherSuiteList.getTotalLength(), dtlsCipherSuiteList,
                 (short) 1, new DtlsCompressionMethodType(DtlsCompressionMethodType.TLS_COMPRESSION_METHOD_NULL)
@@ -271,6 +272,7 @@ public class DtlsMessageTest {
 
     public static DtlsServerHello createDtlsServerHelloTest() {
         DtlsServerHello dtlsServerHello = new DtlsServerHello(
+                new DtlsProtocolVersion(DtlsProtocolVersion.DTLS_1_0),
                 DtlsRandom.getRandom(),
                 (short) 8, new byte[] { (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08 },
                 new DtlsCipherSuite(DtlsCipherSuiteType.TLS_RSA_WITH_RC4_128_MD5),

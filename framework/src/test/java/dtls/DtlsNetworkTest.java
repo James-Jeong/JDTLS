@@ -7,6 +7,7 @@ import dtls.fsm.definition.DtlsEvent;
 import dtls.fsm.definition.DtlsState;
 import dtls.handler.DtlsPacketHandler;
 import dtls.packet.DtlsPacket;
+import dtls.packet.base.DtlsContentType;
 import dtls.packet.base.DtlsRecordFactory;
 import dtls.packet.handshake.DtlsHandshake;
 import dtls.packet.recordlayer.DtlsRecordHeader;
@@ -154,7 +155,7 @@ public class DtlsNetworkTest {
                 dtlsClientHello.getData().length
         );
         DtlsHandshake dtlsHandshake = makeDtlsHandshake(dtlsClientHelloHandshakeCommonBody, dtlsClientHello);
-        DtlsPacket dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        DtlsPacket dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         byte[] dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -176,7 +177,7 @@ public class DtlsNetworkTest {
                 dtlsHelloVerifyRequest.getData().length
         );
         dtlsHandshake = makeDtlsHandshake(dtlsHelloVerifyRequestHandshakeCommonBody, dtlsHelloVerifyRequest);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -204,7 +205,7 @@ public class DtlsNetworkTest {
                 dtlsClientHello.getData().length
         );
         dtlsHandshake = makeDtlsHandshake(dtlsClientHelloHandshakeCommonBody, dtlsClientHello);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -229,7 +230,7 @@ public class DtlsNetworkTest {
                 dtlsServerHello.getData().length
         );
         dtlsHandshake = makeDtlsHandshake(dtlsServerHelloHandshakeCommonBody, dtlsServerHello);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -258,7 +259,7 @@ public class DtlsNetworkTest {
                 certificateDataLength
         );
         dtlsHandshake = makeDtlsHandshake(dtlsCertificateHandshakeCommonBody, dtlsCertificate);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -276,7 +277,7 @@ public class DtlsNetworkTest {
                 dtlsServerKeyExchange.getData().length
         );
         dtlsHandshake = makeDtlsHandshake(dtlsServerKeyExchangeHandshakeCommonBody, dtlsServerKeyExchange);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -303,7 +304,7 @@ public class DtlsNetworkTest {
                 0
         );
         dtlsHandshake = makeDtlsHandshake(dtlsServerHelloDoneExchangeHandshakeCommonBody, dtlsServerHelloDone);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -325,7 +326,7 @@ public class DtlsNetworkTest {
                 certificateDataLength
         );
         dtlsHandshake = makeDtlsHandshake(dtlsCertificateHandshakeCommonBody, dtlsCertificate);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -350,7 +351,7 @@ public class DtlsNetworkTest {
                 dtlsClientKeyExchange.getData().length
         );
         dtlsHandshake = makeDtlsHandshake(dtlsClientKeyExchangeHandshakeCommonBody, dtlsClientKeyExchange);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -372,7 +373,7 @@ public class DtlsNetworkTest {
         ///////////////////////////////
         // 12) SEND CHANGE CIPHER SPEC (Client > Server)
         DtlsChangeCipherSpec dtlsChangeCipherSpecMessage = DtlsMessageTest.createDtlsChangeCipherSpecTest();
-        dtlsPacket = makeSingleDtlsPacket(dtlsChangeCipherSpecMessage);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_CHANGE_CIPHER_SPEC, dtlsChangeCipherSpecMessage);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -390,7 +391,7 @@ public class DtlsNetworkTest {
                 0
         );
         dtlsHandshake = makeDtlsHandshake(dtlsFinishedHandshakeCommonBody, dtlsFinished);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel1.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -405,7 +406,7 @@ public class DtlsNetworkTest {
         ///////////////////////////////
         // 14) SEND CHANGE CIPHER SPEC (Server > Client)
         dtlsChangeCipherSpecMessage = DtlsMessageTest.createDtlsChangeCipherSpecTest();
-        dtlsPacket = makeSingleDtlsPacket(dtlsChangeCipherSpecMessage);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_CHANGE_CIPHER_SPEC, dtlsChangeCipherSpecMessage);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -425,7 +426,7 @@ public class DtlsNetworkTest {
                 0
         );
         dtlsHandshake = makeDtlsHandshake(dtlsFinishedHandshakeCommonBody, dtlsFinished);
-        dtlsPacket = makeSingleDtlsPacket(dtlsHandshake);
+        dtlsPacket = makeSingleDtlsPacket(DtlsContentType.TLS_TYPE_HANDSHAKE, dtlsHandshake);
         dtlsPacketData = dtlsPacket.getData();
         Assert.assertNotNull(dtlsPacketData);
         nettyChannel2.sendData(dtlsPacketData, dtlsPacketData.length);
@@ -462,7 +463,7 @@ public class DtlsNetworkTest {
         return DtlsMessageTest.createDtlsHandshakeByObjectTest(dtlsHandshakeCommonBody, dtlsFormat);
     }
 
-    public static DtlsPacket makeMultiDtlsPacket(List<DtlsRecordFactory> dtlsRecordFactoryList) {
+    public static DtlsPacket makeMultiDtlsPacket(int dtlsContentType, List<DtlsRecordFactory> dtlsRecordFactoryList) {
         if (dtlsRecordFactoryList == null || dtlsRecordFactoryList.isEmpty()) { return null; }
 
         List<DtlsRecordLayer> dtlsRecordLayerList = new ArrayList<>();
@@ -472,19 +473,19 @@ public class DtlsNetworkTest {
             byte[] dtlsRecordFactoryData = dtlsRecordFactory.getData();
             if (dtlsRecordFactoryData == null) { continue; }
 
-            DtlsRecordHeader dtlsRecordHeader = DtlsMessageTest.createDtlsRecordHeaderTest(dtlsRecordFactoryData.length);
+            DtlsRecordHeader dtlsRecordHeader = DtlsMessageTest.createDtlsRecordHeaderTest(dtlsContentType, dtlsRecordFactoryData.length);
             DtlsRecordLayer dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsRecordFactory);
             dtlsRecordLayerList.add(dtlsRecordLayer);
         }
         return DtlsMessageTest.createDtlsPacketTest(dtlsRecordLayerList);
     }
 
-    public static DtlsPacket makeSingleDtlsPacket(DtlsRecordFactory dtlsRecordFactory) {
+    public static DtlsPacket makeSingleDtlsPacket(int dtlsContentType, DtlsRecordFactory dtlsRecordFactory) {
         if (dtlsRecordFactory == null) { return null; }
 
         byte[] dtlsHandshakeData = dtlsRecordFactory.getData();
 
-        DtlsRecordHeader dtlsRecordHeader = DtlsMessageTest.createDtlsRecordHeaderTest(dtlsHandshakeData.length);
+        DtlsRecordHeader dtlsRecordHeader = DtlsMessageTest.createDtlsRecordHeaderTest(dtlsContentType, dtlsHandshakeData.length);
         List<DtlsRecordLayer> dtlsRecordLayerList = new ArrayList<>();
         DtlsRecordLayer dtlsRecordLayer = new DtlsRecordLayer(dtlsRecordHeader, dtlsRecordFactory);
         dtlsRecordLayerList.add(dtlsRecordLayer);

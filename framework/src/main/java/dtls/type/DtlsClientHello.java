@@ -15,6 +15,7 @@ public class DtlsClientHello extends DtlsFormat {
     private DtlsProtocolVersion protocolVersion = null; // 2 bytes
     transient private byte[] randomBytes = null; // 32 bytes > DtlsRandom.getRandom()
     private short sessionIdLength = 0; // 1 byte
+    transient private byte[] sessionId = null; // sessionIdLength bytes
     private short cookieLength = 0; // 1 byte
     transient private byte[] cookie = null; // cookieLength bytes
     private int cipherSuitesLength = 0; // 2 bytes
@@ -25,12 +26,13 @@ public class DtlsClientHello extends DtlsFormat {
 
     ////////////////////////////////////////////////////////////
     public DtlsClientHello(DtlsProtocolVersion protocolVersion, byte[] randomBytes,
-                           short sessionIdLength, short cookieLength, byte[] cookie,
+                           short sessionIdLength, byte[] sessionId, short cookieLength, byte[] cookie,
                            int cipherSuitesLength, DtlsCipherSuiteList dtlsCipherSuiteList,
                            short compressionMethodsLength, DtlsCompressionMethodType compressionMethod) {
         this.protocolVersion = protocolVersion;
         this.randomBytes = randomBytes;
         this.sessionIdLength = sessionIdLength;
+        this.sessionId = sessionId;
         this.cookieLength = cookieLength;
         this.cookie = cookie;
         this.cipherSuitesLength = cipherSuitesLength;
@@ -60,6 +62,12 @@ public class DtlsClientHello extends DtlsFormat {
             System.arraycopy(sessionIdLengthData, 0, sessionIdLengthData2, ByteUtil.NUM_BYTES_IN_BYTE, ByteUtil.NUM_BYTES_IN_BYTE);
             sessionIdLength = ByteUtil.bytesToShort(sessionIdLengthData2, true);
             index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+            if (sessionIdLength > 0) {
+                sessionId = new byte[sessionIdLength];
+                System.arraycopy(data, index, sessionId, 0, sessionIdLength);
+                index += sessionIdLength;
+            }
 
             byte[] cookieLengthData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
             System.arraycopy(data, index, cookieLengthData, 0, ByteUtil.NUM_BYTES_IN_BYTE);
@@ -108,7 +116,7 @@ public class DtlsClientHello extends DtlsFormat {
         if (protocolVersion == null || randomBytes == null || dtlsCompressionMethod == null) { return null; }
 
         int index = 0;
-        byte[] data = new byte[MIN_LENGTH + cookieLength + cipherSuitesLength];
+        byte[] data = new byte[MIN_LENGTH + sessionIdLength + cookieLength + cipherSuitesLength];
 
         System.arraycopy(protocolVersion.getVersion(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
         index += ByteUtil.NUM_BYTES_IN_SHORT;
@@ -121,6 +129,11 @@ public class DtlsClientHello extends DtlsFormat {
         System.arraycopy(sessionIdLengthData, ByteUtil.NUM_BYTES_IN_BYTE, sessionIdLengthData2, 0, ByteUtil.NUM_BYTES_IN_BYTE);
         System.arraycopy(sessionIdLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
         index += ByteUtil.NUM_BYTES_IN_BYTE;
+
+        if (sessionIdLength > 0 && sessionId != null) {
+            System.arraycopy(sessionId, 0, data, index, sessionIdLength);
+            index += sessionIdLength;
+        }
 
         byte[] cookieLengthData = ByteUtil.shortToBytes(cookieLength, true);
         byte[] cookieLengthData2 = new byte[ByteUtil.NUM_BYTES_IN_BYTE];
@@ -185,6 +198,14 @@ public class DtlsClientHello extends DtlsFormat {
 
     public void setSessionIdLength(short sessionIdLength) {
         this.sessionIdLength = sessionIdLength;
+    }
+
+    public byte[] getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(byte[] sessionId) {
+        this.sessionId = sessionId;
     }
 
     public short getCookieLength() {

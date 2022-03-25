@@ -2,6 +2,7 @@ package dtls.type;
 
 import dtls.cipher.DtlsCipherSuite;
 import dtls.compression.DtlsCompressionMethodType;
+import dtls.packet.base.DtlsProtocolVersion;
 import dtls.type.base.DtlsFormat;
 import dtls.type.base.DtlsRandom;
 import util.module.ByteUtil;
@@ -11,21 +12,23 @@ public class DtlsServerHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     public static final int LENGTH = 70;
 
+    private DtlsProtocolVersion protocolVersion = null; // 2 bytes
     transient private byte[] randomBytes = null; // 32 bytes (DtlsRandom.getRandom())
     private short sessionIdLength = 0; // 1 byte
-    transient private byte[] sessionIdBytes = null; // 32 bytes
+    transient private byte[] sessionId = null; // 32 bytes
     private DtlsCipherSuite cipherSuite = null; // 2 bytes
     private DtlsCompressionMethodType dtlsCompressionMethod = null; // 1 byte
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
-    public DtlsServerHello(byte[] randomBytes,
+    public DtlsServerHello(DtlsProtocolVersion protocolVersion, byte[] randomBytes,
                            short sessionIdLength, byte[] sessionIdBytes,
                            DtlsCipherSuite cipherSuite,
                            DtlsCompressionMethodType dtlsCompressionMethod) {
+        this.protocolVersion = protocolVersion;
         this.randomBytes = randomBytes;
         this.sessionIdLength = sessionIdLength;
-        this.sessionIdBytes = sessionIdBytes;
+        this.sessionId = sessionIdBytes;
         this.cipherSuite = cipherSuite;
         this.dtlsCompressionMethod = dtlsCompressionMethod;
     }
@@ -35,6 +38,11 @@ public class DtlsServerHello extends DtlsFormat {
     public DtlsServerHello(byte[] data) {
         if (data.length == LENGTH) {
             int index = 0;
+
+            byte[] protocolVersionData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
+            System.arraycopy(data, index, protocolVersionData, 0, ByteUtil.NUM_BYTES_IN_SHORT);
+            protocolVersion = new DtlsProtocolVersion(protocolVersionData);
+            index += ByteUtil.NUM_BYTES_IN_SHORT;
 
             randomBytes = new byte[DtlsRandom.LENGTH];
             System.arraycopy(data, index, randomBytes, 0, DtlsRandom.LENGTH);
@@ -47,8 +55,8 @@ public class DtlsServerHello extends DtlsFormat {
             sessionIdLength = ByteUtil.bytesToShort(sessionIdLengthData2, true);
             index += ByteUtil.NUM_BYTES_IN_BYTE;
 
-            sessionIdBytes = new byte[32];
-            System.arraycopy(data, index, sessionIdBytes, 0, 32);
+            sessionId = new byte[32];
+            System.arraycopy(data, index, sessionId, 0, 32);
             index += 32;
 
             byte[] cipherSuiteData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];
@@ -66,11 +74,14 @@ public class DtlsServerHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
     @Override
     public byte[] getData() {
-        if (randomBytes == null || sessionIdBytes == null
+        if (protocolVersion == null || randomBytes == null || sessionId == null
                 || cipherSuite == null || dtlsCompressionMethod == null) { return null; }
 
         int index = 0;
         byte[] data = new byte[LENGTH];
+
+        System.arraycopy(protocolVersion.getVersion(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
+        index += ByteUtil.NUM_BYTES_IN_SHORT;
 
         System.arraycopy(randomBytes, 0, data, index, randomBytes.length);
         index += randomBytes.length;
@@ -81,8 +92,8 @@ public class DtlsServerHello extends DtlsFormat {
         System.arraycopy(sessionIdLengthData2, 0, data, index, ByteUtil.NUM_BYTES_IN_BYTE);
         index += ByteUtil.NUM_BYTES_IN_BYTE;
 
-        System.arraycopy(sessionIdBytes, 0, data, index, sessionIdBytes.length);
-        index += sessionIdBytes.length;
+        System.arraycopy(sessionId, 0, data, index, sessionId.length);
+        index += sessionId.length;
 
         System.arraycopy(cipherSuite.getCipherSuite(), 0, data, index, ByteUtil.NUM_BYTES_IN_SHORT);
         index += ByteUtil.NUM_BYTES_IN_SHORT;
@@ -97,6 +108,14 @@ public class DtlsServerHello extends DtlsFormat {
     ////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////
+    public DtlsProtocolVersion getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(DtlsProtocolVersion protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
     public byte[] getRandomBytes() {
         return randomBytes;
     }
@@ -113,12 +132,12 @@ public class DtlsServerHello extends DtlsFormat {
         this.sessionIdLength = sessionIdLength;
     }
 
-    public byte[] getSessionIdBytes() {
-        return sessionIdBytes;
+    public byte[] getSessionId() {
+        return sessionId;
     }
 
-    public void setSessionIdBytes(byte[] sessionIdBytes) {
-        this.sessionIdBytes = sessionIdBytes;
+    public void setSessionId(byte[] sessionId) {
+        this.sessionId = sessionId;
     }
 
     public DtlsCipherSuite getCipherSuite() {
