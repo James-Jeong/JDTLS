@@ -21,7 +21,7 @@ public class TlsSessionTicket {
     public TlsSessionTicket() {}
 
     public TlsSessionTicket(byte[] data) {
-        if (data.length >= MIN_LENGTH) {
+        if (data != null && data.length >= MIN_LENGTH) {
             int index = 0;
 
             byte[] lifeTimeHintData = new byte[ByteUtil.NUM_BYTES_IN_INT];

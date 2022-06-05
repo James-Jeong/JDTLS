@@ -27,7 +27,7 @@ public class DtlsHandshakeCommonBody {
     public DtlsHandshakeCommonBody() {}
 
     public DtlsHandshakeCommonBody(byte[] data) {
-        if (data.length == LENGTH) {
+        if (data != null && data.length == LENGTH) {
             int index = 0;
 
             byte[] handshakeTypeData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];

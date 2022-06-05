@@ -18,7 +18,7 @@ public class DtlsCipherSuiteList {
 
     public DtlsCipherSuiteList(byte[] data) {
         // 2 바이트씩 끊어서 읽으면 된다.
-        if ((data.length >= DtlsCipherSuiteType.LENGTH) &&
+        if (data != null && (data.length >= DtlsCipherSuiteType.LENGTH) &&
                 (data.length % DtlsCipherSuiteType.LENGTH == 0)) {
             int index = 0;
             while (index < data.length) {

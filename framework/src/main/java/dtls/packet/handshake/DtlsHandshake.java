@@ -28,7 +28,7 @@ public class DtlsHandshake implements DtlsRecordFactory {
     public DtlsHandshake() {}
 
     public DtlsHandshake(byte[] data) {
-        if (data.length >= DtlsHandshakeCommonBody.LENGTH) {
+        if (data != null && data.length >= DtlsHandshakeCommonBody.LENGTH) {
             int index = 0;
 
             byte[] commonBodyData = new byte[DtlsHandshakeCommonBody.LENGTH];

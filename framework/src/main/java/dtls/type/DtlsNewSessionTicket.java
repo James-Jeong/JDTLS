@@ -19,7 +19,7 @@ public class DtlsNewSessionTicket extends DtlsFormat {
     public DtlsNewSessionTicket() {}
 
     public DtlsNewSessionTicket(byte[] data) {
-        if (data.length == LENGTH) {
+        if (data != null && data.length == LENGTH) {
             int index = 0;
 
             byte[] tlsSessionTicketData = new byte[TlsSessionTicket.MIN_LENGTH];

@@ -23,7 +23,7 @@ public class DtlsCertificate extends DtlsFormat {
     public DtlsCertificate() {}
 
     public DtlsCertificate(byte[] data) {
-        if (data.length >= MIN_LENGTH) {
+        if (data != null && data.length >= MIN_LENGTH) {
             int index = 0;
 
             byte[] certificatesLengthData = new byte[3];

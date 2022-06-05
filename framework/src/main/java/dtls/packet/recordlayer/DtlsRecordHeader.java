@@ -40,7 +40,7 @@ public class DtlsRecordHeader {
     public DtlsRecordHeader() {}
 
     public DtlsRecordHeader(byte[] data) {
-        if (data.length == LENGTH) {
+        if (data != null && data.length == LENGTH) {
             int index = 0;
 
             byte[] contentTypeData = new byte[ByteUtil.NUM_BYTES_IN_BYTE];

@@ -14,7 +14,7 @@ public class DtlsApplicationData implements DtlsRecordFactory {
     public DtlsApplicationData() {}
 
     public DtlsApplicationData(byte[] data) {
-        if (data.length > 0) {
+        if (data != null && data.length > 0) {
             encryptedApplicationData = new byte[data.length];
             System.arraycopy(data, 0, encryptedApplicationData, 0, data.length);
         }

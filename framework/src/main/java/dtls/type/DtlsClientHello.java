@@ -44,7 +44,7 @@ public class DtlsClientHello extends DtlsFormat {
     public DtlsClientHello() {}
 
     public DtlsClientHello(byte[] data) {
-        if (data.length >= MIN_LENGTH) {
+        if (data != null && data.length >= MIN_LENGTH) {
             int index = 0;
 
             byte[] protocolVersionData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];

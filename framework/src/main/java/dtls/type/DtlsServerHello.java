@@ -36,7 +36,7 @@ public class DtlsServerHello extends DtlsFormat {
     public DtlsServerHello() {}
 
     public DtlsServerHello(byte[] data) {
-        if (data.length == LENGTH) {
+        if (data != null && data.length == LENGTH) {
             int index = 0;
 
             byte[] protocolVersionData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];

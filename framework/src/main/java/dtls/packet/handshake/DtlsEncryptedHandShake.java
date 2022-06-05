@@ -15,7 +15,7 @@ public class DtlsEncryptedHandShake implements DtlsRecordFactory {
     public DtlsEncryptedHandShake() {}
 
     public DtlsEncryptedHandShake(byte[] data) {
-        if (data.length > 0) {
+        if (data != null && data.length > 0) {
             encryptedMessage = new byte[data.length];
             System.arraycopy(data, 0, encryptedMessage, 0, data.length);
             encryptedMessageLength = encryptedMessage.length;

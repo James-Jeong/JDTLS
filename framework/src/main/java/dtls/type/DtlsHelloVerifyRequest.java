@@ -24,7 +24,7 @@ public class DtlsHelloVerifyRequest extends DtlsFormat {
     public DtlsHelloVerifyRequest() {}
 
     public DtlsHelloVerifyRequest(byte[] data) {
-        if (data.length >= MIN_LENGTH) {
+        if (data != null && data.length >= MIN_LENGTH) {
             int index = 0;
 
             byte[] protocolVersionData = new byte[ByteUtil.NUM_BYTES_IN_SHORT];

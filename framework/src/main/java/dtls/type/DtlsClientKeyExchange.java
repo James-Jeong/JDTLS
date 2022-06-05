@@ -20,13 +20,15 @@ public class DtlsClientKeyExchange extends DtlsFormat {
     public DtlsClientKeyExchange() {}
 
     public DtlsClientKeyExchange(byte[] data) {
-        int index = 0;
+        if (data != null) {
+            int index = 0;
 
-        int remainLength = data.length - index;
-        if (remainLength > 0) {
-            encryptedPreMasterSecretData = new byte[remainLength];
-            System.arraycopy(data, index, encryptedPreMasterSecretData, 0, remainLength);
-            encryptedPreMasterSecretDataLength = encryptedPreMasterSecretData.length;
+            int remainLength = data.length - index;
+            if (remainLength > 0) {
+                encryptedPreMasterSecretData = new byte[remainLength];
+                System.arraycopy(data, index, encryptedPreMasterSecretData, 0, remainLength);
+                encryptedPreMasterSecretDataLength = encryptedPreMasterSecretData.length;
+            }
         }
     }
     ////////////////////////////////////////////////////////////

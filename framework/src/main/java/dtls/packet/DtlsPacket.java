@@ -34,7 +34,7 @@ public class DtlsPacket {
     public DtlsPacket() {}
 
     public DtlsPacket(byte[] data) {
-        if (data.length >= DtlsRecordHeader.LENGTH) {
+        if (data != null && data.length >= DtlsRecordHeader.LENGTH) {
             int index = 0;
             dtlsRecordLayerList = new ArrayList<>();
 

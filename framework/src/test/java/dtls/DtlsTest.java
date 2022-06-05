@@ -8,8 +8,8 @@ public class DtlsTest {
     public void test() {
         /////////////////////////////////////////////////////////
         // DtlsMessageTest
-        /*DtlsMessageTest dtlsMessageTest = new DtlsMessageTest();
-        dtlsMessageTest.test();*/
+        DtlsMessageTest dtlsMessageTest = new DtlsMessageTest();
+        dtlsMessageTest.test();
         /////////////////////////////////////////////////////////
 
         /////////////////////////////////////////////////////////

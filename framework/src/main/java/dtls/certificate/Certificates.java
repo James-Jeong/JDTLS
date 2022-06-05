@@ -20,7 +20,7 @@ public class Certificates {
     public Certificates() {}
 
     public Certificates(byte[] data) {
-        if (data.length > 0) {
+        if (data != null && data.length > 0) {
             int index = 0;
 
             byte[] lengthData = new byte[3];

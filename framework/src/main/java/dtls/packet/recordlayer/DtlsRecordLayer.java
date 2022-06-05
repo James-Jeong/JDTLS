@@ -31,7 +31,7 @@ public class DtlsRecordLayer {
     public DtlsRecordLayer() {}
 
     public DtlsRecordLayer(byte[] data) {
-        if (data.length >= DtlsRecordHeader.LENGTH) {
+        if (data != null && data.length >= DtlsRecordHeader.LENGTH) {
             int index = 0;
 
             byte[] dtlsRecordHeaderData = new byte[DtlsRecordHeader.LENGTH];
